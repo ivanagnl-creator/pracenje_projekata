@@ -1847,33 +1847,105 @@ const SUPA_URL_P = 'https://dfyoretkmtxqunvbaqyq.supabase.co';
 const SUPA_KEY_P = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmeW9yZXRrbXR4cXVudmJhcXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2MDg4NDEsImV4cCI6MjEwMDE4NDg0MX0.QHYeV-jJjhWpzDi7w9oIFCdWFBNw66abg_U8X70ZztU';
 const SUPA_TABLE_P = 'pracenje_projekata';
 const SUPA_ROW_ID_P = 1;
+// Broj verzije zapisa u bazi, procitan pri zadnjem ucitavanju.
+// Sluzi da se prepozna je li netko drugi spremio izmjene u meduvremenu.
+let SUPA_VERZIJA_P = null;
 
 async function supaLoadP() {
   try {
-    const r = await fetch(`${SUPA_URL_P}/rest/v1/${SUPA_TABLE_P}?id=eq.${SUPA_ROW_ID_P}&select=data`, {
+    const r = await fetch(`${SUPA_URL_P}/rest/v1/${SUPA_TABLE_P}?id=eq.${SUPA_ROW_ID_P}&select=data,verzija`, {
+      cache: 'no-store',
       headers: { 'apikey': SUPA_KEY_P, 'Authorization': 'Bearer ' + SUPA_KEY_P }
     });
-    if (!r.ok) return null;
+    if (!r.ok) {
+      console.error('[SUPA] LOAD GRESKA', r.status, await r.text());
+      return null;
+    }
     const rows = await r.json();
-    if (rows && rows.length > 0 && rows[0].data) return rows[0].data;
+    if (rows && rows.length > 0 && typeof rows[0].verzija === 'number') {
+      SUPA_VERZIJA_P = rows[0].verzija;
+      console.log('[SUPA] Verzija u bazi:', SUPA_VERZIJA_P);
+    }
+    if (rows && rows.length > 0 && rows[0].data) {
+      console.log('[SUPA] LOAD OK - projekata:',
+        Array.isArray(rows[0].data) ? rows[0].data.length : '?');
+      return rows[0].data;
+    }
     return null;
-  } catch(e) { return null; }
+  } catch(e) {
+    console.error('[SUPA] LOAD IZNIMKA', e);
+    return null;
+  }
 }
 
 async function supaSaveP(dataObj) {
   try {
-    const r = await fetch(`${SUPA_URL_P}/rest/v1/${SUPA_TABLE_P}`, {
-      method: 'POST',
+    if (!Array.isArray(dataObj) || dataObj.length === 0) {
+      console.error('[SUPA] SAVE ODBIJEN - popis projekata je prazan, ne saljem u bazu');
+      return false;
+    }
+    if (SUPA_VERZIJA_P === null) {
+      console.error('[SUPA] SAVE PRESKOCEN - verzija iz baze nije poznata (ucitavanje nije uspjelo)');
+      return 'nepoznato';
+    }
+    // Upisi SAMO ako je verzija u bazi jos uvijek ona koju smo ucitali.
+    const r = await fetch(
+      `${SUPA_URL_P}/rest/v1/${SUPA_TABLE_P}?id=eq.${SUPA_ROW_ID_P}&verzija=eq.${SUPA_VERZIJA_P}`, {
+      method: 'PATCH',
       headers: {
         'apikey': SUPA_KEY_P,
         'Authorization': 'Bearer ' + SUPA_KEY_P,
         'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates'
+        'Prefer': 'return=representation'
       },
-      body: JSON.stringify({ id: SUPA_ROW_ID_P, data: dataObj })
+      body: JSON.stringify({ data: dataObj, verzija: SUPA_VERZIJA_P + 1 })
     });
-    return r.ok;
-  } catch(e) { return false; }
+    const txt = await r.text();
+    if (!r.ok) {
+      console.error('[SUPA] SAVE GRESKA', r.status, txt);
+      return false;
+    }
+    let vraceno = [];
+    try { vraceno = JSON.parse(txt); } catch(e) {}
+    if (!Array.isArray(vraceno) || vraceno.length === 0) {
+      console.warn('[SUPA] SUDAR - netko je spremio izmjene u meduvremenu. Nista nije prepisano.');
+      return 'sudar';
+    }
+    SUPA_VERZIJA_P = vraceno[0].verzija;
+    console.log('[SUPA] SAVE OK, nova verzija:', SUPA_VERZIJA_P);
+    return true;
+  } catch(e) {
+    console.error('[SUPA] SAVE IZNIMKA', e);
+    return false;
+  }
+}
+
+// Prikazuje se kad je netko drugi spremio izmjene dok si ti radila.
+function upozoriNaSudarP(){
+  var d=document.getElementById('sudar-obavijest');
+  if(d) return;
+  d=document.createElement('div');
+  d.id='sudar-obavijest';
+  d.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);'+
+    'display:flex;align-items:center;justify-content:center;padding:20px';
+  d.innerHTML=
+    '<div style="background:#fff;max-width:460px;border-radius:10px;padding:22px 24px;'+
+    'box-shadow:0 8px 30px rgba(0,0,0,.3);font-size:14px;line-height:1.55;'+
+    'font-family:system-ui,sans-serif">'+
+    '<div style="font-weight:700;color:#c00000;font-size:16px;margin-bottom:10px">'+
+    'Netko je u meduvremenu spremio izmjene</div>'+
+    '<p style="margin:0 0 10px">Tvoja zadnja izmjena <b>nije</b> spremljena u zajednicku bazu, '+
+    'da ne bi prebrisala tudi rad.</p>'+
+    '<p style="margin:0 0 16px">Osvjezi stranicu da vidis novo stanje, pa unesi svoju izmjenu ponovno. '+
+    'Ako je izmjena bila opsezna, prvo ju negdje zapisi.</p>'+
+    '<button onclick="location.reload()" style="background:#1a4ea8;color:#fff;border:none;'+
+    'padding:9px 16px;border-radius:6px;font-size:14px;cursor:pointer;margin-right:8px">'+
+    'Osvjezi stranicu</button>'+
+    '<button onclick="document.getElementById(\'sudar-obavijest\').remove()" '+
+    'style="background:#eee;color:#333;border:none;padding:9px 16px;border-radius:6px;'+
+    'font-size:14px;cursor:pointer">Zatvori</button>'+
+    '</div>';
+  document.body.appendChild(d);
 }
 
 let projects = JSON.parse(localStorage.getItem('projekti') || '[]');
@@ -2394,7 +2466,11 @@ function save() {
     localStorage.setItem('prac_zadnji_urednik', currentUser + ', ' + ds + ' u ' + vr);
   }
   supaSaveP(projects).then(ok => {
-    if (!ok) console.warn('Supabase save nije uspio, podaci su spremljeni lokalno.');
+    if (ok === 'sudar') {
+      upozoriNaSudarP();
+    } else if (!ok) {
+      console.warn('Supabase save nije uspio, podaci su spremljeni lokalno.');
+    }
   });
 }
 
