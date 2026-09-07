@@ -1859,6 +1859,8 @@ const SUPA_ROW_ID_P = 1;
 // Broj verzije zapisa u bazi, procitan pri zadnjem ucitavanju.
 // Sluzi da se prepozna je li netko drugi spremio izmjene u meduvremenu.
 let SUPA_VERZIJA_P = null;
+// Postaje true ako se ne moze doci do baze (npr. baza je uspavana / nema mreze).
+let SUPA_NEDOSTUPNA_P = false;
 
 async function supaLoadP() {
   try {
@@ -1868,8 +1870,10 @@ async function supaLoadP() {
     });
     if (!r.ok) {
       console.error('[SUPA] LOAD GRESKA', r.status, await r.text());
+      SUPA_NEDOSTUPNA_P = true;
       return null;
     }
+    SUPA_NEDOSTUPNA_P = false;
     const rows = await r.json();
     if (rows && rows.length > 0 && typeof rows[0].verzija === 'number') {
       SUPA_VERZIJA_P = rows[0].verzija;
@@ -1883,8 +1887,30 @@ async function supaLoadP() {
     return null;
   } catch(e) {
     console.error('[SUPA] LOAD IZNIMKA', e);
+    SUPA_NEDOSTUPNA_P = true;
     return null;
   }
+}
+
+// Prikazuje traku pri vrhu kad baza nije dostupna (najcesce uspavana).
+function prikaziBazaMirovanjeP(){
+  if (document.getElementById('baza-mirovanje')) return;
+  var d = document.createElement('div');
+  d.id = 'baza-mirovanje';
+  d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99998;'+
+    'background:#B8860B;color:#fff;padding:11px 16px;font-size:14px;'+
+    'font-family:system-ui,sans-serif;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.25)';
+  d.innerHTML = '\u23F8 Baza je trenutno u mirovanju, pa se prikazuju zadnji poznati podaci. '+
+    'Nove izmjene se neće spremiti dok se baza ne probudi — javi administratoru (Ivana). '+
+    '<button onclick="location.reload()" style="margin-left:10px;background:#fff;color:#8a6508;'+
+    'border:none;padding:5px 12px;border-radius:5px;font-size:13px;cursor:pointer;font-weight:600">'+
+    'Poku\u0161aj ponovno</button>';
+  document.body.appendChild(d);
+  document.body.style.paddingTop = '46px';
+}
+function sakrijBazaMirovanjeP(){
+  var d = document.getElementById('baza-mirovanje');
+  if (d) { d.remove(); document.body.style.paddingTop = ''; }
 }
 
 async function supaSaveP(dataObj) {
@@ -4466,6 +4492,7 @@ window.addEventListener('DOMContentLoaded', async function() {
     projects = supaData;
     localStorage.setItem('projekti', JSON.stringify(projects));
   }
+  if (SUPA_NEDOSTUPNA_P) prikaziBazaMirovanjeP(); else sakrijBazaMirovanjeP();
   render();
   if (!currentUser) {
     showLoginScreenPrac();
