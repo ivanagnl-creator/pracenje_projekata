@@ -1548,8 +1548,16 @@ Zahtjev za EES predan u HEP 19.02.2026. – čekamo ponudu HEP-a.</div>
   </div>
   <div style="display: block; padding: 16px;">
     <div class="form-grid"><div class="form-group">
-          <label>Ugovorena / procijenjena vrijednost (s PDV-om)</label>
-          <input type="text" id="f-vrijednost" placeholder="npr. 1.250.000,00 €">
+          <label>Procijenjena vrijednost (s PDV-om)</label>
+          <input type="text" id="f-vrijednost" placeholder="npr. 1.250.000,00 €" oninput="osvjeziRazliku()">
+        </div>
+        <div class="form-group">
+          <label>Ugovorena vrijednost (s PDV-om)</label>
+          <input type="text" id="f-ugovorena" placeholder="npr. 1.100.000,00 €" oninput="osvjeziRazliku()">
+        </div>
+        <div class="form-group">
+          <label>Razlika (procijenjena − ugovorena)</label>
+          <input type="text" id="f-razlika" placeholder="izračunava se automatski" readonly style="background:#f3f4f6; font-weight:600;">
         </div>
         <div class="form-group">
           <label>Sufinancirano od Fonda</label>
@@ -2727,9 +2735,17 @@ function cardHtml(p, i, displayRbr) {
         ${diaryPreview(p.sljedeca,   'Slijedeća aktiv.',  p.id)}
         ${diaryPreview(p.rokInv,     'Rok investicije',   p.id)}
         ${(p.vrijednostLog?.[0]?.txt || p.vrijednost) ? `<div class="card-row">
-          <div class="card-label">Vrijednost (s PDV)</div>
+          <div class="card-label">Procijenjena vr. (s PDV)</div>
           <div class="card-value highlight">${p.vrijednostLog?.[0]?.txt || p.vrijednost}</div>
         </div>` : ''}
+        ${p.ugovorenaVrijednost ? `<div class="card-row">
+          <div class="card-label">Ugovorena vr. (s PDV)</div>
+          <div class="card-value highlight">${p.ugovorenaVrijednost}</div>
+        </div>` : ''}
+        ${(() => { const r = izracunajRazliku(p.vrijednostLog?.[0]?.txt || p.vrijednost, p.ugovorenaVrijednost); return r ? `<div class="card-row">
+          <div class="card-label">Razlika</div>
+          <div class="card-value highlight" style="color:${r.negativna ? '#C0392B' : '#1E7A46'}">${r.txt}</div>
+        </div>` : ''; })()}
         ${p.sufinanciranje ? `<div class="card-row">
           <div class="card-label">Sufinancirano od Fonda</div>
           <div class="card-value highlight">${p.sufinanciranje}</div>
@@ -3133,9 +3149,17 @@ function archivedCardHtml(p, i) {
         ${diaryPreview(p.radovi, 'Status i rok', p.id)}
         ${diaryPreview(p.rokInv, 'Rok investicije', p.id)}
         ${(p.vrijednostLog?.[0]?.txt || p.vrijednost) ? `<div class="card-row">
-          <div class="card-label">Vrijednost (s PDV)</div>
+          <div class="card-label">Procijenjena vr. (s PDV)</div>
           <div class="card-value highlight">${p.vrijednostLog?.[0]?.txt || p.vrijednost}</div>
         </div>` : ''}
+        ${p.ugovorenaVrijednost ? `<div class="card-row">
+          <div class="card-label">Ugovorena vr. (s PDV)</div>
+          <div class="card-value highlight">${p.ugovorenaVrijednost}</div>
+        </div>` : ''}
+        ${(() => { const r = izracunajRazliku(p.vrijednostLog?.[0]?.txt || p.vrijednost, p.ugovorenaVrijednost); return r ? `<div class="card-row">
+          <div class="card-label">Razlika</div>
+          <div class="card-value highlight" style="color:${r.negativna ? '#C0392B' : '#1E7A46'}">${r.txt}</div>
+        </div>` : ''; })()}
         ${p.proracunGodine && p.proracunGodine.length ? `<div class="card-row">
           <div class="card-label">Proračun GZ</div>
           <div class="card-value">${p.proracunGodine.map(r=>`<span style="display:block"><b>${r.godina}.</b> ${r.iznos}</span>`).join('')}</div>
@@ -3207,12 +3231,16 @@ function openModal(project = null) {
     })(),
     'f-datum-zavrsen':    project?.datumZavrsen || '',
     'f-vrijednost':       project?.vrijednostLog?.[0]?.txt || project?.vrijednost || '',
+    'f-ugovorena':        project?.ugovorenaVrijednost || '',
     'f-sufinanciranje':   project?.sufinanciranje || '',
   };
   Object.entries(simple).forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (el) el.value = val;
   });
+
+  // Prikaži izračunatu razliku vrijednosti
+  if (typeof osvjeziRazliku === 'function') osvjeziRazliku();
 
   // Postavi kapitalni checkbox
   const kapEl = document.getElementById('f-kapitalni');
@@ -3378,8 +3406,10 @@ function pregledKartice(){
       row('Datum završetka',fd(p.datumZavrsen)!=='—'?fd(p.datumZavrsen):((p.rokInv&&p.rokInv.length&&p.rokInv[0].txt)?p.rokInv[0].txt:'—'))+
       '</div>')+
     sek('Financije','<div class="pg">'+
-      row('Vrijednost radova',p.vrijednost)+row('Sufinanciranje',p.sufinanciranje)+
-      row('Ugovorena vr.',p.ugovorenaVrijednost)+row('Ugovor br.',p.ugovorBroj)+
+      row('Procijenjena vr.',p.vrijednost)+row('Ugovorena vr.',p.ugovorenaVrijednost)+
+      (()=>{const r=izracunajRazliku(p.vrijednost,p.ugovorenaVrijednost);return r?row('Razlika',r.txt):'';})()+
+      row('Sufinanciranje',p.sufinanciranje)+
+      row('Ugovor br.',p.ugovorBroj)+
       row('Datum ugovora',fd(p.datumUgovora))+row('Izvođač',p.izvodac)+row('Nadzor',p.nadzor)+
       '</div>')+
     (pro?sek('Proračun po godinama',pro):'')+
@@ -3481,9 +3511,10 @@ function ispisModalPDF() {
     row('Datum završetka', formatDatum(p.datumZavrsen) !== '\u2014' ? formatDatum(p.datumZavrsen) : ((p.rokInv && p.rokInv.length && p.rokInv[0].txt) ? p.rokInv[0].txt : '\u2014')) +
     '</div></div>' +
     '<div class="print-section"><h3>Financije</h3><div class="print-grid">' +
-    row('Vrijednost radova', p.vrijednost) +
-    row('Sufinanciranje', p.sufinanciranje) +
+    row('Procijenjena vr.', p.vrijednost) +
     row('Ugovorena vr.', p.ugovorenaVrijednost) +
+    (()=>{const r=izracunajRazliku(p.vrijednost,p.ugovorenaVrijednost);return r?row('Razlika',r.txt):'';})() +
+    row('Sufinanciranje', p.sufinanciranje) +
     row('Ugovor br.', p.ugovorBroj) +
     row('Datum ugovora', formatDatum(p.datumUgovora)) +
     row('Izvođač', p.izvodac) +
@@ -3808,6 +3839,7 @@ function saveProject() {
       return s;
     })(),
     vrijednost:      get('f-vrijednost'),
+    ugovorenaVrijednost: get('f-ugovorena'),
     sufinanciranje:  get('f-sufinanciranje'),
     proracunGodine:  proracunGodine.filter(r => r.godina || r.iznos),
     nositelj:        get('f-nositelj'),
@@ -3901,6 +3933,61 @@ document.getElementById('overlay').addEventListener('mousedown', closeOnOverlay)
 
 
 // ── IZVOZ U EXCEL (ExcelJS) ──────────────────────────────────
+
+// ---- Financije: procijenjena / ugovorena / razlika ----
+// Pretvara upisani iznos u broj. Prihvaca hrvatski format (1.250.000,00) i
+// jednostavni (1250000 / 1250000.00). Vraca null ako tekst nije cist iznos.
+function parseIznos(txt) {
+  if (txt == null) return null;
+  let t = String(txt).trim();
+  if (!t) return null;
+  // makni valutu i razmake
+  t = t.replace(/€|eur|EUR|kn|HRK/gi, '').trim();
+  // ako uz broj ima slova/rijeci (opisni tekst), odbij
+  if (/[a-zA-Zčćžšđ]/.test(t)) return null;
+  // makni razmake unutar broja
+  t = t.replace(/\s+/g, '');
+  // hrvatski format: tocka = tisucice, zarez = decimale -> 1.250.000,00
+  if (t.indexOf(',') > -1) {
+    t = t.replace(/\./g, '').replace(',', '.');
+  } else {
+    // nema zareza: tocke su ili tisucice (1.250.000) ili decimalne (1250.5)
+    const dijelovi = t.split('.');
+    if (dijelovi.length > 2) {
+      t = dijelovi.join('');            // vise tocaka = tisucice
+    } else if (dijelovi.length === 2 && dijelovi[1].length === 3) {
+      t = dijelovi.join('');            // npr. 250.000 -> tisucice
+    }
+    // inace ostavljamo kako jest (npr. 1250.5 = decimala)
+  }
+  const n = parseFloat(t);
+  return isNaN(n) ? null : n;
+}
+
+function formatIznos(n) {
+  return n.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+}
+
+// Vraca { txt, negativna } ili null ako se ne moze izracunati.
+function izracunajRazliku(procijenjena, ugovorena) {
+  const p = parseIznos(procijenjena);
+  const u = parseIznos(ugovorena);
+  if (p == null || u == null) return null;
+  const r = p - u;
+  return { txt: formatIznos(r), negativna: r < 0 };
+}
+
+// Osvjezava polje razlike u formi dok korisnik tipka
+function osvjeziRazliku() {
+  const proc = document.getElementById('f-vrijednost')?.value;
+  const ugov = document.getElementById('f-ugovorena')?.value;
+  const out  = document.getElementById('f-razlika');
+  if (!out) return;
+  const rez = izracunajRazliku(proc, ugov);
+  out.value = rez ? rez.txt : '';
+  out.style.color = (rez && rez.negativna) ? '#C0392B' : '#111';
+}
+
 async function izvozExcel(samoZadnji = false) {
   const SEKTORI_LABEL = { zdravstvo: 'Zdravstvo', socijala: 'Socijala', energetska: 'Energetska obnova', ostalo: 'Ostalo' };
   const getSektorLabel = s => SEKTORI_LABEL[s] || (s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Ostalo');
