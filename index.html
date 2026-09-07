@@ -1151,7 +1151,8 @@ input[type="date"].rok-datum-upozorenje { border-color: var(--amber) !important;
       <button class="btn-print" onclick="copyTeamsLink()" title="Kopiraj link za Teams">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>Teams
       </button>
-      <button class="btn-export" onclick="izvozExcel()">📥 Izvoz u Excel</button>
+      <button class="btn-export" onclick="izvozExcel(false)">📥 Izvoz u Excel</button>
+      <button class="btn-export" onclick="izvozExcel(true)" title="Za svaki projekt samo zadnji (najnoviji) unos u svakom dnevniku">📥 Izvoz – zadnji unos</button>
       <button onclick="openDinamikaTab()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#1a4a8a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px">
   📋 Otvori Dinamiku
 </button>
@@ -3900,11 +3901,15 @@ document.getElementById('overlay').addEventListener('mousedown', closeOnOverlay)
 
 
 // ── IZVOZ U EXCEL (ExcelJS) ──────────────────────────────────
-async function izvozExcel() {
+async function izvozExcel(samoZadnji = false) {
   const SEKTORI_LABEL = { zdravstvo: 'Zdravstvo', socijala: 'Socijala', energetska: 'Energetska obnova', ostalo: 'Ostalo' };
   const getSektorLabel = s => SEKTORI_LABEL[s] || (s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Ostalo');
   const STATUS_LABEL  = { aktivan: 'Aktivni radovi', ceka: 'Čeka pokretanje', zavrsen: 'Završeno', problem: 'Problem / Kašnjenje' };
-  const diaryStr = arr => (arr||[]).map(e => (e.txt||'').trim()).filter(s => s).join('\n– ');
+  const diaryStr = arr => {
+    const svi = (arr||[]).map(e => (e.txt||'').trim()).filter(s => s);
+    if (samoZadnji) return svi.length ? svi[0] : '';   // samo najnoviji (na indeksu 0)
+    return svi.join('\n– ');
+  };
 
   const allHeaders = [
     'Rbr.', 'Ustanova / adresa', 'Vrsta radova', 'Nositelj aktivnosti',
@@ -4020,7 +4025,7 @@ async function izvozExcel() {
   const now = new Date();
   const datum = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   a.href = url;
-  a.download = `projekti-zagreb-${datum}.xlsx`;
+  a.download = samoZadnji ? `projekti-zagreb-zadnji-unos-${datum}.xlsx` : `projekti-zagreb-${datum}.xlsx`;
   document.body.appendChild(a); a.click();
   document.body.removeChild(a); URL.revokeObjectURL(url);
 }
