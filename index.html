@@ -1123,6 +1123,32 @@ input[type="date"].rok-datum-upozorenje { border-color: var(--amber) !important;
  * @copyright Louis-Dominique Dubeau
  */function n(t){return t>=65&&t<=90||95===t||t>=97&&t<=122||t>=192&&t<=214||t>=216&&t<=246||t>=248&&t<=767||t>=880&&t<=893||t>=895&&t<=8191||t>=8204&&t<=8205||t>=8304&&t<=8591||t>=11264&&t<=12271||t>=12289&&t<=55295||t>=63744&&t<=64975||t>=65008&&t<=65533||t>=65536&&t<=983039}Object.defineProperty(r,"__esModule",{value:!0}),r.NC_NAME_START_CHAR="A-Z_a-z\xc0-\xd6\xd8-\xf6\xf8-\u02ff\u0370-\u037d\u037f-\u1fff\u200c-\u200d\u2070-\u218f\u2c00-\u2fef\u3001-\ud7ff\uf900-\ufdcf\ufdf0-\ufffd\ud800\udc00-\udb7f\udfff",r.NC_NAME_CHAR="-"+r.NC_NAME_START_CHAR+".0-9\xb7\u0300-\u036f\u203f-\u2040",r.NC_NAME_START_CHAR_RE=new RegExp("^["+r.NC_NAME_START_CHAR+"]$","u"),r.NC_NAME_CHAR_RE=new RegExp("^["+r.NC_NAME_CHAR+"]$","u"),r.NC_NAME_RE=new RegExp("^["+r.NC_NAME_START_CHAR+"]["+r.NC_NAME_CHAR+"]*$","u"),r.isNCNameStartChar=n,r.isNCNameChar=function(t){return n(t)||45===t||46===t||t>=48&&t<=57||183===t||t>=768&&t<=879||t>=8255&&t<=8256}},{}]},{},[15])(15)}));
 //# sourceMappingURL=exceljs.min.js.map</script>
+<style id="gost-css">
+body.gost-mod [onclick*="openModal"],
+body.gost-mod [onclick*="saveProject"],
+body.gost-mod [onclick*="deleteProject"],
+body.gost-mod [onclick*="dodajUnos"],
+body.gost-mod [onclick*="dodajStatusRok"],
+body.gost-mod [onclick*="dodajJnUnos"],
+body.gost-mod [onclick*="dodajNapomenu"],
+body.gost-mod [onclick*="dodajOpremajeRok"],
+body.gost-mod [onclick*="dodajProracunGodinu"],
+body.gost-mod [onclick*="dodajRokInvesticije"],
+body.gost-mod [onclick*="dodajSljedecaRok"],
+body.gost-mod [onclick*="obrisiUnos"],
+body.gost-mod [onclick*="obrisiProracunGodinu"],
+body.gost-mod [onclick*="saveDinLink"],
+body.gost-mod [onclick*="saveDinAccLink"],
+body.gost-mod [onclick*="saveDinPanelLink"],
+body.gost-mod [onclick*="uvoz"],
+body.gost-mod [onclick*="Uvoz"],
+body.gost-mod [onclick*="importJson"],
+body.gost-mod .btn-new,
+body.gost-mod .btn-edit,
+body.gost-mod .btn-delete {
+  display: none !important;
+}
+</style>
 </head>
 <body class="">
 
@@ -4430,7 +4456,8 @@ function renderDinAccPreview(p, orgs) {
     <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#6b7a96;text-transform:uppercase;margin-bottom:4px">Grad Zagreb · GUSZBOI</div>
     <div style="font-size:16px;font-weight:700;color:#1a2b4a;margin-bottom:4px">Praćenje investicijskih projekata</div>
     <div style="font-size:12px;color:#6b7a96;margin-bottom:24px">Upiši svoje ime za nastavak</div>
-    <input id="login-name-inp" type="text" placeholder="Ime i prezime" maxlength="40" style="width:100%;padding:10px 14px;border:1.5px solid #dce3ef;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:12px;outline:none" onkeydown="if(event.key==='Enter')submitLoginPrac()">
+    <input id="login-name-inp" type="text" placeholder="Ime i prezime" maxlength="40" style="width:100%;padding:10px 14px;border:1.5px solid #dce3ef;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:12px;outline:none" onkeydown="if(event.key==='Enter')document.getElementById('login-pass-inp').focus()">
+    <input id="login-pass-inp" type="password" placeholder="Lozinka za unos (prazno = samo pregled)" style="width:100%;padding:10px 14px;border:1.5px solid #dce3ef;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:12px;outline:none" onkeydown="if(event.key==='Enter')submitLoginPrac()">
     <button onclick="submitLoginPrac()" style="width:100%;padding:11px;background:#1a4a8a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">
       Prijava →
     </button>
@@ -4446,17 +4473,41 @@ function showLoginScreenPrac() {
   }, 100);
 }
 
+var LOZINKA_UNOS = "Unos-GUSZBOI";
+var jeGost = false;
 function submitLoginPrac() {
   var inp = document.getElementById('login-name-inp');
   var v = inp ? inp.value.trim() : '';
   if (!v) { if(inp) inp.style.border='1.5px solid #c0283a'; return; }
+  var pass = (document.getElementById('login-pass-inp') ? document.getElementById('login-pass-inp').value : '');
+  jeGost = (pass !== LOZINKA_UNOS);
+  sessionStorage.setItem('prac_gost', jeGost ? '1' : '0');
   currentUser = v;
   localStorage.setItem('prac_username', v);
   var ls = document.getElementById('login-screen');
   if (ls) ls.style.display = 'none';
   var ud = document.getElementById('current-user-display');
   if (ud) ud.textContent = v;
+  primijeniGostNacinP();
   render();
+}
+
+// Ukljucuje/iskljucuje mogucnost unosa ovisno o jeGost.
+function primijeniGostNacinP(){
+  document.body.classList.toggle('gost-mod', jeGost);
+  var tr=document.getElementById('gost-traka');
+  if(jeGost){
+    if(!tr){
+      tr=document.createElement('div');
+      tr.id='gost-traka';
+      tr.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99997;'+
+        'background:#5A6B7B;color:#fff;padding:7px 16px;font-size:13px;'+
+        'font-family:system-ui,sans-serif;text-align:center;letter-spacing:.3px';
+      tr.textContent='\uD83D\uDC41 Na\u010din: samo pregled \u2014 unos i ure\u0111ivanje nisu dostupni';
+      document.body.appendChild(tr);
+      document.body.style.paddingTop=(document.body.style.paddingTop && document.body.style.paddingTop!=='0px')?'80px':'34px';
+    }
+  } else if(tr){ tr.remove(); }
 }
 
 function promptChangeUser() {
@@ -4499,6 +4550,8 @@ window.addEventListener('DOMContentLoaded', async function() {
   } else {
     var ud = document.getElementById('current-user-display');
     if (ud) ud.textContent = currentUser;
+    jeGost = (sessionStorage.getItem('prac_gost') === '1');
+    primijeniGostNacinP();
   }
 });
 </script>
