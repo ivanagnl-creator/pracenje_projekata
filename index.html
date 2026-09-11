@@ -1124,6 +1124,8 @@ input[type="date"].rok-datum-upozorenje { border-color: var(--amber) !important;
  */function n(t){return t>=65&&t<=90||95===t||t>=97&&t<=122||t>=192&&t<=214||t>=216&&t<=246||t>=248&&t<=767||t>=880&&t<=893||t>=895&&t<=8191||t>=8204&&t<=8205||t>=8304&&t<=8591||t>=11264&&t<=12271||t>=12289&&t<=55295||t>=63744&&t<=64975||t>=65008&&t<=65533||t>=65536&&t<=983039}Object.defineProperty(r,"__esModule",{value:!0}),r.NC_NAME_START_CHAR="A-Z_a-z\xc0-\xd6\xd8-\xf6\xf8-\u02ff\u0370-\u037d\u037f-\u1fff\u200c-\u200d\u2070-\u218f\u2c00-\u2fef\u3001-\ud7ff\uf900-\ufdcf\ufdf0-\ufffd\ud800\udc00-\udb7f\udfff",r.NC_NAME_CHAR="-"+r.NC_NAME_START_CHAR+".0-9\xb7\u0300-\u036f\u203f-\u2040",r.NC_NAME_START_CHAR_RE=new RegExp("^["+r.NC_NAME_START_CHAR+"]$","u"),r.NC_NAME_CHAR_RE=new RegExp("^["+r.NC_NAME_CHAR+"]$","u"),r.NC_NAME_RE=new RegExp("^["+r.NC_NAME_START_CHAR+"]["+r.NC_NAME_CHAR+"]*$","u"),r.isNCNameStartChar=n,r.isNCNameChar=function(t){return n(t)||45===t||46===t||t>=48&&t<=57||183===t||t>=768&&t<=879||t>=8255&&t<=8256}},{}]},{},[15])(15)}));
 //# sourceMappingURL=exceljs.min.js.map</script>
 <style id="gost-css">
+body.gost-mod [onclick*="archiveProject"],
+body.gost-mod [onclick*="unarchiveProject"],
 body.gost-mod [onclick*="openModal"],
 body.gost-mod [onclick*="saveProject"],
 body.gost-mod [onclick*="deleteProject"],
@@ -1615,6 +1617,26 @@ Zahtjev za EES predan u HEP 19.02.2026. – čekamo ponudu HEP-a.</div>
       <button type="button" onclick="refreshDinAcc()" style="padding:7px 14px;background:#f0f4fa;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-left:6px">↻ Osvježi</button>
     </div>
     <div id="din-acc-preview" style="font-size:13px;color:#6b7a96"><div style="background:#fef3cd;padding:10px;border-radius:8px;font-size:13px"><b>Veza je postavljena!</b><br>Otvori DSO_Dinamika_Projekata.html u istom pregledniku pa klikni Osvježi.</div></div>
+  </div>
+</div>
+<div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+  <div onclick="toggleAcc(this)" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;height:41px;box-sizing:border-box;background:#0d7c3d11;cursor:pointer;user-select:none">
+    <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#0d7c3d">\uD83D\uDCF7 Fotografije / dokumenti</span>
+    <span style="font-size:11px;color:#0d7c3d">\u25B2</span>
+  </div>
+  <div style="display:block;padding:16px">
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Fotografije \u2013 prije radova (putanja)</label>
+      <input type="text" id="f-foto-prije" placeholder="npr. \\\\server\\projekti\\...\\prije">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label>Fotografije \u2013 nakon radova (putanja)</label>
+      <input type="text" id="f-foto-poslije" placeholder="npr. \\\\server\\projekti\\...\\poslije">
+    </div>
+    <label style="font-size:11px;font-weight:600;color:#6b7a96;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Dodatne poveznice</label>
+    <div id="foto-linkovi-lista"></div>
+    <button type="button" onclick="dodajFotoLink()" style="padding:7px 14px;background:#f0f4fa;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">\u2795 Dodaj poveznicu</button>
+    <p style="font-size:11px;color:#6b7a96;margin-top:10px;line-height:1.4">Upi\u0161i putanju do mape s fotografijama. Na kartici i u pregledu bit \u0107e gumb <b>Kopiraj</b> \u2014 klik kopira putanju, pa je zalijepi\u0161 u Windows Explorer (Ctrl+V) i pritisne\u0161 Enter.</p>
   </div>
 </div>
     <div class="modal-footer">
@@ -2798,6 +2820,7 @@ function cardHtml(p, i, displayRbr) {
           <div class="card-label">Razlika</div>
           <div class="card-value highlight" style="color:${r.negativna ? '#C0392B' : '#1E7A46'}">${r.txt}</div>
         </div>` : ''; })()}
+        ${fotoRedoviKartica(p)}
         ${p.sufinanciranje ? `<div class="card-row">
           <div class="card-label">Sufinancirano od Fonda</div>
           <div class="card-value highlight">${p.sufinanciranje}</div>
@@ -3212,6 +3235,7 @@ function archivedCardHtml(p, i) {
           <div class="card-label">Razlika</div>
           <div class="card-value highlight" style="color:${r.negativna ? '#C0392B' : '#1E7A46'}">${r.txt}</div>
         </div>` : ''; })()}
+        ${fotoRedoviKartica(p)}
         ${p.proracunGodine && p.proracunGodine.length ? `<div class="card-row">
           <div class="card-label">Proračun GZ</div>
           <div class="card-value">${p.proracunGodine.map(r=>`<span style="display:block"><b>${r.godina}.</b> ${r.iznos}</span>`).join('')}</div>
@@ -3293,6 +3317,14 @@ function openModal(project = null) {
 
   // Prikaži izračunatu razliku vrijednosti
   if (typeof osvjeziRazliku === 'function') osvjeziRazliku();
+
+  // Fotografije: fiksna dva polja + slobodni popis
+  var _fp = document.getElementById('f-foto-prije');
+  var _fs = document.getElementById('f-foto-poslije');
+  if (_fp) _fp.value = project?.fotoPrije || '';
+  if (_fs) _fs.value = project?.fotoPoslije || '';
+  fotoLinkovi = Array.isArray(project?.fotoLinkovi) ? JSON.parse(JSON.stringify(project.fotoLinkovi)) : [];
+  renderFotoLinkovi();
 
   // Postavi kapitalni checkbox
   const kapEl = document.getElementById('f-kapitalni');
@@ -3464,6 +3496,7 @@ function pregledKartice(){
       row('Ugovor br.',p.ugovorBroj)+
       row('Datum ugovora',fd(p.datumUgovora))+row('Izvođač',p.izvodac)+row('Nadzor',p.nadzor)+
       '</div>')+
+    (function(){var fr=fotoRedoviPregled(p);return fr?sek('Fotografije / dokumenti','<table style="width:100%;border-collapse:collapse">'+fr+'</table>'):'';})()+
     (pro?sek('Proračun po godinama',pro):'')+
     din+
     lst('Javna nabava',p.jnRadovi,'txt','ts')+
@@ -3892,6 +3925,9 @@ function saveProject() {
     })(),
     vrijednost:      get('f-vrijednost'),
     ugovorenaVrijednost: get('f-ugovorena'),
+    fotoPrije:       get('f-foto-prije'),
+    fotoPoslije:     get('f-foto-poslije'),
+    fotoLinkovi:     (fotoLinkovi||[]).filter(function(l){return (l.putanja||'').trim();}),
     sufinanciranje:  get('f-sufinanciranje'),
     proracunGodine:  proracunGodine.filter(r => r.godina || r.iznos),
     nositelj:        get('f-nositelj'),
@@ -4467,6 +4503,8 @@ function renderDinAccPreview(p, orgs) {
 function showLoginScreenPrac() {
   var ls = document.getElementById('login-screen');
   if (ls) { ls.style.display = 'flex'; }
+  var pass = document.getElementById('login-pass-inp');
+  if (pass) pass.value = '';
   setTimeout(function(){ 
     var inp = document.getElementById('login-name-inp');
     if (inp) inp.focus();
@@ -4482,6 +4520,7 @@ function submitLoginPrac() {
   var pass = (document.getElementById('login-pass-inp') ? document.getElementById('login-pass-inp').value : '');
   jeGost = (pass !== LOZINKA_UNOS);
   sessionStorage.setItem('prac_gost', jeGost ? '1' : '0');
+  sessionStorage.setItem('prac_prijava', '1');
   currentUser = v;
   localStorage.setItem('prac_username', v);
   var ls = document.getElementById('login-screen');
@@ -4521,6 +4560,45 @@ function promptChangeUser() {
 }
 
 // ── ALIAS FUNKCIJE (DCP panel) ─────────────────────────────────
+// ---- Fotografije / dokumenti: slobodne poveznice ----
+let fotoLinkovi = [];  // [{opis, putanja}]
+
+function renderFotoLinkovi() {
+  const box = document.getElementById('foto-linkovi-lista');
+  if (!box) return;
+  box.innerHTML = fotoLinkovi.map(function(l, i) {
+    return '<div style="display:flex;gap:6px;margin-bottom:6px">' +
+      '<input type="text" value="' + (l.opis||'').replace(/"/g,'&quot;') + '" placeholder="opis (npr. detalji)" ' +
+        'oninput="fotoLinkovi[' + i + '].opis=this.value" ' +
+        'style="flex:0 0 32%;padding:7px 9px;font-size:12px;border:1.5px solid var(--border);border-radius:8px">' +
+      '<input type="text" value="' + (l.putanja||'').replace(/"/g,'&quot;') + '" placeholder="putanja" ' +
+        'oninput="fotoLinkovi[' + i + '].putanja=this.value" ' +
+        'style="flex:1;padding:7px 9px;font-size:12px;border:1.5px solid var(--border);border-radius:8px">' +
+      '<button type="button" onclick="fotoLinkovi.splice(' + i + ',1);renderFotoLinkovi()" ' +
+        'title="Ukloni" style="padding:0 10px;background:#fbeaea;color:#c0283a;border:1px solid #e4b6b6;border-radius:8px;font-size:14px;cursor:pointer">\u2715</button>' +
+      '</div>';
+  }).join('');
+}
+function dodajFotoLink() {
+  fotoLinkovi.push({ opis:'', putanja:'' });
+  renderFotoLinkovi();
+}
+
+// Kopira tekst u me\u0111uspremnik (za gumb Kopiraj na kartici/pregledu)
+function kopirajPutanju(txt, btn) {
+  function ok(){ if(btn){ const o=btn.textContent; btn.textContent='\u2713 Kopirano'; setTimeout(function(){btn.textContent=o;},1500); } }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(ok).catch(function(){ fallbackKopiraj(txt); ok(); });
+  } else { fallbackKopiraj(txt); ok(); }
+}
+function fallbackKopiraj(txt){
+  const ta=document.createElement('textarea'); ta.value=txt;
+  ta.style.position='fixed'; ta.style.left='-9999px';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+}
+
 function saveDinLink() { saveDinPanelLink(); }
 function refreshDinPanel() {
   var p = projects.find(function(x){ return x.id==dcpId; });
@@ -4545,13 +4623,15 @@ window.addEventListener('DOMContentLoaded', async function() {
   }
   if (SUPA_NEDOSTUPNA_P) prikaziBazaMirovanjeP(); else sakrijBazaMirovanjeP();
   render();
-  if (!currentUser) {
-    showLoginScreenPrac();
-  } else {
+  // Prijava se trazi na svakom otvaranju (nova kartica/sesija).
+  // Unutar iste sesije (F5) prijava se pamti da ne smeta stalnim korisnicima.
+  if (sessionStorage.getItem('prac_prijava') === '1') {
     var ud = document.getElementById('current-user-display');
     if (ud) ud.textContent = currentUser;
     jeGost = (sessionStorage.getItem('prac_gost') === '1');
     primijeniGostNacinP();
+  } else {
+    showLoginScreenPrac();
   }
 });
 </script>
