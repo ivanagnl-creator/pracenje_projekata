@@ -1626,17 +1626,13 @@ Zahtjev za EES predan u HEP 19.02.2026. – čekamo ponudu HEP-a.</div>
   </div>
   <div style="display:block;padding:16px">
     <div class="form-group" style="margin-bottom:12px">
-      <label>Fotografije \u2013 prije radova (putanja)</label>
-      <input type="text" id="f-foto-prije" placeholder="npr. \\\\server\\projekti\\...\\prije">
+      <label>Fotografije (putanja do mape)</label>
+      <input type="text" id="f-foto" placeholder="npr. \\\\server\\projekti\\CENTAR\\fotografije">
     </div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label>Fotografije \u2013 nakon radova (putanja)</label>
-      <input type="text" id="f-foto-poslije" placeholder="npr. \\\\server\\projekti\\...\\poslije">
-    </div>
-    <label style="font-size:11px;font-weight:600;color:#6b7a96;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Dodatne poveznice</label>
+    <label style="font-size:11px;font-weight:600;color:#6b7a96;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Dodatne poveznice (npr. prije, poslije, u tijeku)</label>
     <div id="foto-linkovi-lista"></div>
     <button type="button" onclick="dodajFotoLink()" style="padding:7px 14px;background:#f0f4fa;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">\u2795 Dodaj poveznicu</button>
-    <p style="font-size:11px;color:#6b7a96;margin-top:10px;line-height:1.4">Upi\u0161i putanju do mape s fotografijama. Na kartici i u pregledu bit \u0107e gumb <b>Kopiraj</b> \u2014 klik kopira putanju, pa je zalijepi\u0161 u Windows Explorer (Ctrl+V) i pritisne\u0161 Enter.</p>
+    <p style="font-size:11px;color:#6b7a96;margin-top:10px;line-height:1.4">Zeleni gumb <b>Kopiraj</b> na kartici kopira putanju. Zalijepi je u Windows Explorer (Ctrl+V) i pritisni Enter da se otvori mapa.</p>
   </div>
 </div>
     <div class="modal-footer">
@@ -3319,10 +3315,8 @@ function openModal(project = null) {
   if (typeof osvjeziRazliku === 'function') osvjeziRazliku();
 
   // Fotografije: fiksna dva polja + slobodni popis
-  var _fp = document.getElementById('f-foto-prije');
-  var _fs = document.getElementById('f-foto-poslije');
-  if (_fp) _fp.value = project?.fotoPrije || '';
-  if (_fs) _fs.value = project?.fotoPoslije || '';
+  var _ff = document.getElementById('f-foto');
+  if (_ff) _ff.value = project?.foto || project?.fotoPrije || '';
   fotoLinkovi = Array.isArray(project?.fotoLinkovi) ? JSON.parse(JSON.stringify(project.fotoLinkovi)) : [];
   renderFotoLinkovi();
 
@@ -3925,8 +3919,7 @@ function saveProject() {
     })(),
     vrijednost:      get('f-vrijednost'),
     ugovorenaVrijednost: get('f-ugovorena'),
-    fotoPrije:       get('f-foto-prije'),
-    fotoPoslije:     get('f-foto-poslije'),
+    foto:            get('f-foto'),
     fotoLinkovi:     (fotoLinkovi||[]).filter(function(l){return (l.putanja||'').trim();}),
     sufinanciranje:  get('f-sufinanciranje'),
     proracunGodine:  proracunGodine.filter(r => r.godina || r.iznos),
@@ -4585,6 +4578,16 @@ function dodajFotoLink() {
 }
 
 // Kopira tekst u me\u0111uspremnik (za gumb Kopiraj na kartici/pregledu)
+function toast(msg){
+  var t=document.getElementById('_toast_p');
+  if(!t){ t=document.createElement('div'); t.id='_toast_p';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);'+
+      'background:#1a2440;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;'+
+      'z-index:99999;box-shadow:0 4px 16px rgba(0,0,0,.3);opacity:0;transition:opacity .2s';
+    document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._h); t._h=setTimeout(function(){ t.style.opacity='0'; }, 2200);
+}
 function kopirajPutanju(txt, btn) {
   function ok(){ if(btn){ const o=btn.textContent; btn.textContent='\u2713 Kopirano'; setTimeout(function(){btn.textContent=o;},1500); } }
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -4602,8 +4605,7 @@ function fallbackKopiraj(txt){
 // Gradi HTML retke za fotografije na KARTICI (s gumbom Kopiraj)
 function fotoRedoviKartica(p) {
   var stavke = [];
-  if (p.fotoPrije)   stavke.push(['Fotografije \u2013 prije', p.fotoPrije]);
-  if (p.fotoPoslije) stavke.push(['Fotografije \u2013 nakon', p.fotoPoslije]);
+  if (p.foto || p.fotoPrije) stavke.push(['Fotografije', p.foto || p.fotoPrije]);
   (p.fotoLinkovi||[]).forEach(function(l){
     if (l && l.putanja) stavke.push([l.opis || 'Poveznica', l.putanja]);
   });
@@ -4623,8 +4625,7 @@ function fotoRedoviKartica(p) {
 // Verzija za PREGLED/PDF (tablicni redovi)
 function fotoRedoviPregled(p) {
   var stavke = [];
-  if (p.fotoPrije)   stavke.push(['Fotografije \u2013 prije', p.fotoPrije]);
-  if (p.fotoPoslije) stavke.push(['Fotografije \u2013 nakon', p.fotoPoslije]);
+  if (p.foto || p.fotoPrije) stavke.push(['Fotografije', p.foto || p.fotoPrije]);
   (p.fotoLinkovi||[]).forEach(function(l){
     if (l && l.putanja) stavke.push([l.opis || 'Poveznica', l.putanja]);
   });
