@@ -4599,6 +4599,45 @@ function fallbackKopiraj(txt){
   document.body.removeChild(ta);
 }
 
+// Gradi HTML retke za fotografije na KARTICI (s gumbom Kopiraj)
+function fotoRedoviKartica(p) {
+  var stavke = [];
+  if (p.fotoPrije)   stavke.push(['Fotografije \u2013 prije', p.fotoPrije]);
+  if (p.fotoPoslije) stavke.push(['Fotografije \u2013 nakon', p.fotoPoslije]);
+  (p.fotoLinkovi||[]).forEach(function(l){
+    if (l && l.putanja) stavke.push([l.opis || 'Poveznica', l.putanja]);
+  });
+  if (!stavke.length) return '';
+  return stavke.map(function(par){
+    var lbl = par[0], put = par[1];
+    var putEsc = put.replace(/\\/g,'\\\\').replace(/'/g, "\\'").replace(/"/g,'&quot;');
+    return '<div class="card-row">' +
+      '<div class="card-label">' + lbl + '</div>' +
+      '<div class="card-value" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<span style="font-family:monospace;font-size:11px;word-break:break-all;color:#444">' + put + '</span>' +
+        '<button type="button" onclick="kopirajPutanju(\'' + putEsc + '\', this)" ' +
+          'style="padding:3px 10px;background:#0d7c3d;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;white-space:nowrap">\uD83D\uDCCB Kopiraj</button>' +
+      '</div></div>';
+  }).join('');
+}
+// Verzija za PREGLED/PDF (tablicni redovi)
+function fotoRedoviPregled(p) {
+  var stavke = [];
+  if (p.fotoPrije)   stavke.push(['Fotografije \u2013 prije', p.fotoPrije]);
+  if (p.fotoPoslije) stavke.push(['Fotografije \u2013 nakon', p.fotoPoslije]);
+  (p.fotoLinkovi||[]).forEach(function(l){
+    if (l && l.putanja) stavke.push([l.opis || 'Poveznica', l.putanja]);
+  });
+  if (!stavke.length) return '';
+  return stavke.map(function(par){
+    var putEsc = par[1].replace(/\\/g,'\\\\').replace(/'/g, "\\'").replace(/"/g,'&quot;');
+    return '<tr><td style="padding:4px 8px;font-weight:600;color:#555;vertical-align:top;white-space:nowrap">' + par[0] + '</td>' +
+      '<td style="padding:4px 8px"><span style="font-family:monospace;font-size:11px;word-break:break-all">' + par[1] + '</span> ' +
+      '<button type="button" onclick="kopirajPutanju(\'' + putEsc + '\', this)" ' +
+        'style="padding:2px 8px;background:#0d7c3d;color:#fff;border:none;border-radius:5px;font-size:10px;cursor:pointer;margin-left:6px">\uD83D\uDCCB Kopiraj</button></td></tr>';
+  }).join('');
+}
+
 function saveDinLink() { saveDinPanelLink(); }
 function refreshDinPanel() {
   var p = projects.find(function(x){ return x.id==dcpId; });
