@@ -587,7 +587,7 @@ body {
   border-radius: 18px 18px 0 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 .modal-header h2 {
   font-family: 'Lora', serif;
@@ -1621,8 +1621,8 @@ Zahtjev za EES predan u HEP 19.02.2026. – čekamo ponudu HEP-a.</div>
 </div>
 <div style="margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden">
   <div onclick="toggleAcc(this)" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;height:41px;box-sizing:border-box;background:#0d7c3d11;cursor:pointer;user-select:none">
-    <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#0d7c3d">\uD83D\uDCF7 Fotografije / dokumenti</span>
-    <span style="font-size:11px;color:#0d7c3d">\u25B2</span>
+    <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#0d7c3d">📷 Fotografije / dokumenti</span>
+    <span style="font-size:11px;color:#0d7c3d">▲</span>
   </div>
   <div style="display:block;padding:16px">
     <div class="form-group" style="margin-bottom:12px">
@@ -1631,7 +1631,7 @@ Zahtjev za EES predan u HEP 19.02.2026. – čekamo ponudu HEP-a.</div>
     </div>
     <label style="font-size:11px;font-weight:600;color:#6b7a96;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Dodatne poveznice (npr. prije, poslije, u tijeku)</label>
     <div id="foto-linkovi-lista"></div>
-    <button type="button" onclick="dodajFotoLink()" style="padding:7px 14px;background:#f0f4fa;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">\u2795 Dodaj poveznicu</button>
+    <button type="button" onclick="dodajFotoLink()" style="padding:7px 14px;background:#f0f4fa;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">➕ Dodaj poveznicu</button>
     <p style="font-size:11px;color:#6b7a96;margin-top:10px;line-height:1.4">Zeleni gumb <b>Kopiraj</b> na kartici kopira putanju. Zalijepi je u Windows Explorer (Ctrl+V) i pritisni Enter da se otvori mapa.</p>
   </div>
 </div>
@@ -1948,7 +1948,7 @@ function prikaziBazaMirovanjeP(){
     'Nove izmjene se neće spremiti dok se baza ne probudi — javi administratoru (Ivana). '+
     '<button onclick="location.reload()" style="margin-left:10px;background:#fff;color:#8a6508;'+
     'border:none;padding:5px 12px;border-radius:5px;font-size:13px;cursor:pointer;font-weight:600">'+
-    'Poku\u0161aj ponovno</button>';
+    'Pokušaj ponovno</button>';
   document.body.appendChild(d);
   document.body.style.paddingTop = '46px';
 }
@@ -3288,7 +3288,9 @@ function setNositeljInModal(value) {
 // ── MODAL ──────────────────────────────────────────────────────
 function openModal(project = null) {
   editId = project ? project.id : null;
-  document.getElementById('modalTitle').textContent = project ? 'Uredi projekt' : 'Novi projekt';
+  document.getElementById('modalTitle').innerHTML = project
+    ? 'Uredi projekt' + (project.ustanova ? '<span style="display:block;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:400;color:#9fb6d4;margin-top:3px">' + (project.rbr ? project.rbr + '. ' : '') + String(project.ustanova).replace(/</g,'&lt;') + '</span>' : '')
+    : 'Novi projekt';
 
   const simple = {
     'f-sektor':           project?.sektor ? (project.sektor.charAt(0).toUpperCase() + project.sektor.slice(1)) : '',
@@ -3602,7 +3604,7 @@ function ispisModalPDF() {
     row('Datum nadzor ug.', formatDatum(p.nadzorDatumUgovora)) +
     '</div></div>' +
     ((p.proracunGodine||[]).filter(g=>g.iznos).length ?
-      '<div class="print-section"><h3>Prora\u010dun po godinama</h3>' + proracunHtml + '</div>' : '') +
+      '<div class="print-section"><h3>Proračun po godinama</h3>' + proracunHtml + '</div>' : '') +
     dinHtml +
     listSekcija('Javna nabava \u2014 radovi', p.jnRadovi, 'txt', 'ts') +
     listSekcija('Radovi u tijeku', p.radovi, 'txt', 'ts') +
@@ -4568,7 +4570,7 @@ function renderFotoLinkovi() {
         'oninput="fotoLinkovi[' + i + '].putanja=this.value" ' +
         'style="flex:1;padding:7px 9px;font-size:12px;border:1.5px solid var(--border);border-radius:8px">' +
       '<button type="button" onclick="fotoLinkovi.splice(' + i + ',1);renderFotoLinkovi()" ' +
-        'title="Ukloni" style="padding:0 10px;background:#fbeaea;color:#c0283a;border:1px solid #e4b6b6;border-radius:8px;font-size:14px;cursor:pointer">\u2715</button>' +
+        'title="Ukloni" style="padding:0 10px;background:#fbeaea;color:#c0283a;border:1px solid #e4b6b6;border-radius:8px;font-size:14px;cursor:pointer">✕</button>' +
       '</div>';
   }).join('');
 }
@@ -4618,7 +4620,7 @@ function fotoRedoviKartica(p) {
       '<div class="card-value" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
         '<span style="font-family:monospace;font-size:11px;word-break:break-all;color:#444">' + put + '</span>' +
         '<button type="button" onclick="kopirajPutanju(\'' + putEsc + '\', this)" ' +
-          'style="padding:3px 10px;background:#0d7c3d;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;white-space:nowrap">\uD83D\uDCCB Kopiraj</button>' +
+          'style="padding:3px 10px;background:#0d7c3d;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;white-space:nowrap">📋 Kopiraj</button>' +
       '</div></div>';
   }).join('');
 }
@@ -4635,7 +4637,7 @@ function fotoRedoviPregled(p) {
     return '<tr><td style="padding:4px 8px;font-weight:600;color:#555;vertical-align:top;white-space:nowrap">' + par[0] + '</td>' +
       '<td style="padding:4px 8px"><span style="font-family:monospace;font-size:11px;word-break:break-all">' + par[1] + '</span> ' +
       '<button type="button" onclick="kopirajPutanju(\'' + putEsc + '\', this)" ' +
-        'style="padding:2px 8px;background:#0d7c3d;color:#fff;border:none;border-radius:5px;font-size:10px;cursor:pointer;margin-left:6px">\uD83D\uDCCB Kopiraj</button></td></tr>';
+        'style="padding:2px 8px;background:#0d7c3d;color:#fff;border:none;border-radius:5px;font-size:10px;cursor:pointer;margin-left:6px">📋 Kopiraj</button></td></tr>';
   }).join('');
 }
 
