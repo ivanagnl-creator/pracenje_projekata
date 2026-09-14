@@ -1627,12 +1627,15 @@ Zahtjev za EES predan u HEP 19.02.2026. – čekamo ponudu HEP-a.</div>
   <div style="display:block;padding:16px">
     <div class="form-group" style="margin-bottom:12px">
       <label>Fotografije (putanja do mape)</label>
-      <input type="text" id="f-foto" placeholder="npr. \\\\server\\projekti\\CENTAR\\fotografije">
+      <div style="display:flex;gap:6px">
+        <input type="text" id="f-foto" placeholder="npr. \\\\server\\projekti\\CENTAR\\fotografije" style="flex:1">
+        <button type="button" onclick="kopirajPutanju(document.getElementById('f-foto').value, this)" title="Kopiraj putanju" style="padding:0 12px;background:#0d7c3d;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">📋 Kopiraj</button>
+      </div>
     </div>
     <label style="font-size:11px;font-weight:600;color:#6b7a96;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Dodatne poveznice (npr. prije, poslije, u tijeku)</label>
     <div id="foto-linkovi-lista"></div>
     <button type="button" onclick="dodajFotoLink()" style="padding:7px 14px;background:#f0f4fa;color:#1a4a8a;border:1px solid #1a4a8a;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">➕ Dodaj poveznicu</button>
-    <p style="font-size:11px;color:#6b7a96;margin-top:10px;line-height:1.4">Zeleni gumb <b>Kopiraj</b> na kartici kopira putanju. Zalijepi je u Windows Explorer (Ctrl+V) i pritisni Enter da se otvori mapa.</p>
+    <p style="font-size:11px;color:#6b7a96;margin-top:10px;line-height:1.4">Klik na <b>📋 Kopiraj</b> kopira putanju. Zalijepi je u Windows Explorer (Ctrl+V) i pritisni Enter da se otvori mapa.</p>
   </div>
 </div>
     <div class="modal-footer">
@@ -4116,21 +4119,37 @@ async function izvozExcel(samoZadnji = false) {
   wb.created = new Date();
 
   function addSheet(sheetName, headers, rows, sektorKey) {
+    // Stupci koji se sakrivaju u skracenom izvozu (0-based): 11=Ugovorena, 12=Sufinancirano, 13=Proracun
+    const SAKRIJ = samoZadnji ? [11,12,13] : [];
+    // Uze sirine za skraceni izvoz
+    const SIRINE = samoZadnji ? [5,24,18,10,9,9,14,32,32,32,20,16,16,18,32,32] : COL_WIDTHS;
     const hdrColor = 'FF' + (SEKTOR_BOJE[sektorKey] || SEKTOR_BOJE.svi);
     const altColor = 'FF' + (ALT_BOJE[sektorKey] || ALT_BOJE.svi);
 
     const ws = wb.addWorksheet(sheetName, {
-      pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1 },
+      pageSetup: {
+        orientation: 'landscape',
+        paperSize: 8,                 // A3
+        fitToPage: true,
+        fitToWidth: 1,                // sve stupce u sirinu 1 stranice
+        fitToHeight: 0,               // koliko god redaka treba po visini
+        horizontalCentered: true,     // tablica centrirana po sirini lista
+        margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 }
+      },
+      headerFooter: { oddFooter: '&CStranica &P od &N' },
       views: [{ state: 'frozen', ySplit: 1 }]
     });
+    // Naslovni red se ponavlja na vrhu SVAKE ispisane stranice
+    ws.pageSetup.printTitlesRow = '1:1';
 
     ws.columns = headers.map((h, i) => ({
-      header: '', key: `c${i}`, width: COL_WIDTHS[i] || 20
+      header: '', key: `c${i}`, width: SIRINE[i] || 20,
+      hidden: SAKRIJ.includes(i)
     }));
 
     // Header row
     const hdrRow = ws.addRow(headers);
-    hdrRow.height = 28;
+    hdrRow.height = samoZadnji ? 42 : 28;
     hdrRow.eachCell(cell => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10, name: 'Arial' };
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: hdrColor } };
@@ -4569,6 +4588,8 @@ function renderFotoLinkovi() {
       '<input type="text" value="' + (l.putanja||'').replace(/"/g,'&quot;') + '" placeholder="putanja" ' +
         'oninput="fotoLinkovi[' + i + '].putanja=this.value" ' +
         'style="flex:1;padding:7px 9px;font-size:12px;border:1.5px solid var(--border);border-radius:8px">' +
+      '<button type="button" onclick="kopirajPutanju(fotoLinkovi[' + i + '].putanja, this)" ' +
+        'title="Kopiraj putanju" style="padding:0 10px;background:#0d7c3d;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap">📋</button>' +
       '<button type="button" onclick="fotoLinkovi.splice(' + i + ',1);renderFotoLinkovi()" ' +
         'title="Ukloni" style="padding:0 10px;background:#fbeaea;color:#c0283a;border:1px solid #e4b6b6;border-radius:8px;font-size:14px;cursor:pointer">✕</button>' +
       '</div>';
