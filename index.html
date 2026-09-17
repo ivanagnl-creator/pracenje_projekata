@@ -1173,15 +1173,11 @@ body.gost-mod .btn-delete {
       <button class="btn-backup" onclick="izvozSigurnosnuKopiju()" title="Spremi sve podatke u JSON datoteku">💾 Kopija</button>
       <button class="btn-backup btn-uvoz" onclick="document.getElementById('uvoz-input').click()" title="Učitaj podatke iz JSON datoteke">📂 Uvezi</button>
       <input type="file" id="uvoz-input" accept=".json" style="display:none" onchange="uvozPodataka(this)">
-      <button class="btn-backup btn-uvoz" onclick="document.getElementById('din-uvoz-input').click()" title="Uvezi DSO poveznice iz Dinamike JSON exporta" style="background:rgba(100,180,255,0.18)">🔗 DSO iz Dinamike</button>
       <input type="file" id="din-uvoz-input" accept=".json" style="display:none" onchange="uvozDinDso(this)">
       <button class="btn-print" onclick="printIzvjestaj()">🖨️ Ispis</button>
-      <button class="btn-print" onclick="copyTeamsLink()" title="Kopiraj link za Teams">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>Teams
-      </button>
       <button class="btn-export" onclick="izvozExcel(false)">📥 Izvoz u Excel</button>
       <button class="btn-export" onclick="izvozExcel(true)" title="Za svaki projekt samo zadnji (najnoviji) unos u svakom dnevniku">📥 Izvoz – zadnji unos</button>
-      <button onclick="openDinamikaTab()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#1a4a8a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px">
+      <button onclick="openDinamikaTab()" oncontextmenu="event.preventDefault();promijeniDinamikaUrl()" title="Otvori Dinamiku projekata (desni klik: promijeni poveznicu)" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#1a4a8a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px">
   📋 Otvori Dinamiku
 </button>
 <button class="btn-archive-toggle" id="btnArchiveToggle" onclick="toggleArchiveView()" title="Završeni projekti">✅ Završeni <span id="archiveCount" style="background:rgba(0,0,0,.15);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:2px">3</span></button>
@@ -1219,6 +1215,7 @@ body.gost-mod .btn-delete {
     <option value="rok">Sortiraj: po roku</option>
     <option value="status">Sortiraj: po statusu</option>
     <option value="ustanova">Sortiraj: po ustanovi</option>
+    <option value="odgovorna">Sortiraj: po odgovornoj osobi</option>
   </select>
   <select class="sort-select" id="filterDso" onchange="render()" title="Filtriraj po ustanovi"><option value="">Sve ustanove</option><option value="(prenoćište za beskućnike)">(prenoćište Za Beskućnike)</option><option value="centar za autizam">Centar Za Autizam</option><option value="centar za dugotrajnu skrb - kajzerica">Centar Za Dugotrajnu Skrb - Kajzerica</option><option value="centar za rehabilitaciju silver">Centar Za Rehabilitaciju Silver</option><option value="dječja bolnica &quot;srebrnjak&quot;">Dječja Bolnica "srebrnjak"</option><option value="dso">DSO</option><option value="dso - dizala">Dso - Dizala</option><option value="dso – uređenje sanitarnih prostora">Dso – Uređenje Sanitarnih Prostora</option><option value="dso centar">Dso Centar</option><option value="dso centar, ksaver, medveščak, maksimir">Dso Centar, Ksaver, Medveščak, Maksimir</option><option value="dso dubrava">Dso Dubrava</option><option value="dso ksaver">Dso Ksaver</option><option value="dso maksimir">Dso Maksimir</option><option value="dso medveščak">Dso Medveščak</option><option value="dso park">Dso Park</option><option value="dso peščenica">Dso Peščenica</option><option value="dso prečko">Dso Prečko</option><option value="dso sesvetski kraljevec">Dso Sesvetski Kraljevec</option><option value="dso sv. ana">Dso Sv. Ana</option><option value="dso sv. josip">Dso Sv. Josip</option><option value="dso trešnjevka">Dso Trešnjevka</option><option value="dso trnje">Dso Trnje</option><option value="dz zagreb - centar">Dz Zagreb - Centar</option><option value="dz zagreb - istok">Dz Zagreb - Istok</option><option value="dz zagreb - zapad">Dz Zagreb - Zapad</option><option value="klinika za psihijatriju sveti ivan">Klinika Za Psihijatriju Sveti Ivan</option><option value="klinika za psihijatriju vrapče">Klinika Za Psihijatriju Vrapče</option><option value="kompleks špansko">Kompleks Špansko</option><option value="nastavni zavod za hitnu medicinu">Nastavni Zavod Za Hitnu Medicinu</option><option value="nastavni zavod za javno zdravstvo, dr. andrija štampar">Nastavni Zavod Za Javno Zdravstvo, Dr. Andrija Štampar</option><option value="poliklinika za reumatske bolesti, fizikalnu medicinu i rehabilitaciju dr. drago čop">Poliklinika Za Reumatske Bolesti, Fizikalnu Medicinu I Rehabilitaciju Dr. Drago Čop</option><option value="psihijatrijska bolnica za djecu i mladež">Psihijatrijska Bolnica Za Djecu I Mladež</option><option value="specijalna bolnica za plućne bolesti">Specijalna Bolnica Za Plućne Bolesti</option><option value="specijalna bolnica za zaštitu djece s neurorazvojnim i motoričkim smetnjama">Specijalna Bolnica Za Zaštitu Djece S Neurorazvojnim I Motoričkim Smetnjama</option><option value="stomatološka poliklinika zagreb">Stomatološka Poliklinika Zagreb</option><option value="ustanova za sveobuhvatnu skrb tigrovi">Ustanova Za Sveobuhvatnu Skrb Tigrovi</option><option value="zdravstvene ustanove">Zdravstvene Ustanove</option></select>
   <div class="stats-bar">
@@ -3054,6 +3051,13 @@ function render() {
     return;
   }
 
+  // ── Prikaz grupiran po ODGOVORNOJ OSOBI (GUSZBOI) ──
+  if (sort === 'odgovorna') {
+    renderPoOdgovornoj(filtered, main);
+    renderArchive();
+    return;
+  }
+
   let html = '';
   getSektori().forEach(s => {
     const grp = filtered.filter(p => (p.sektor || 'ostalo') === s.key);
@@ -3128,6 +3132,71 @@ function render() {
   });
   main.innerHTML = html;
   renderArchive();
+}
+
+// Skup zatvorenih grupa u prikazu "po odgovornoj osobi"
+var collapsedOsobe = new Set();
+
+// Prikaz projekata grupiranih po odgovornoj osobi (GUSZBOI), sa brojem projekata po osobi
+function renderPoOdgovornoj(filtered, main) {
+  // Grupiraj po nazivu odgovorne osobe (onako kako je upisano)
+  const grupe = new Map();   // naziv → [projekti]
+  filtered.forEach(p => {
+    const osoba = (p.osobaGuszboi || '').trim() || '(nije dodijeljeno)';
+    if (!grupe.has(osoba)) grupe.set(osoba, []);
+    grupe.get(osoba).push(p);
+  });
+
+  if (grupe.size === 0) {
+    main.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div><h3>Nema projekata</h3><p>Dodajte novi projekt ili promijenite filter.</p></div>`;
+    return;
+  }
+
+  // Sortiraj osobe: najviše projekata prvo, "(nije dodijeljeno)" uvijek zadnje
+  const osobe = [...grupe.keys()].sort((a, b) => {
+    if (a === '(nije dodijeljeno)') return 1;
+    if (b === '(nije dodijeljeno)') return -1;
+    const d = grupe.get(b).length - grupe.get(a).length;
+    if (d !== 0) return d;
+    return a.localeCompare(b, 'hr');
+  });
+
+  let html = '';
+  osobe.forEach(osoba => {
+    const grp = grupe.get(osoba);
+    // Unutar osobe: kapitalni prvo, pa po rednom broju
+    grp.sort((a, b) => {
+      if (a.kapitalni && !b.kapitalni) return -1;
+      if (!a.kapitalni && b.kapitalni) return 1;
+      const aNum = parseInt((a.rbr || '').replace(/[^0-9]/g, '')) || 0;
+      const bNum = parseInt((b.rbr || '').replace(/[^0-9]/g, '')) || 0;
+      return aNum - bNum;
+    });
+    const key = osoba;
+    const collapsed = collapsedOsobe.has(key);
+    const safeKey = key.replace(/'/g, "\\'");
+    html += `<div class="sektor-block" style="border-left:4px solid var(--blue)">
+      <div class="sektor-header" onclick="toggleOsoba('${safeKey}')">
+        <div class="sektor-icon">👤</div>
+        <div class="sektor-info">
+          <div class="sektor-naziv">${osoba}</div>
+          <div class="sektor-meta">${grp.length} projekt${grp.length === 1 ? '' : 'a'}</div>
+        </div>
+        <span class="sektor-count">${grp.length}</span>
+        <span class="sektor-toggle ${collapsed ? 'collapsed' : ''}">▼</span>
+      </div>
+      <div class="sektor-line"></div>
+      <div class="sektor-body ${collapsed ? 'collapsed' : ''}">
+        <div class="cards-grid">${grp.map((p, i) => cardHtml(p, i)).join('')}</div>
+      </div>
+    </div>`;
+  });
+  main.innerHTML = html;
+}
+
+function toggleOsoba(key) {
+  collapsedOsobe.has(key) ? collapsedOsobe.delete(key) : collapsedOsobe.add(key);
+  render();
 }
 
 function toggleGrp(id) {
@@ -4669,13 +4738,34 @@ function refreshDinPanel() {
   openDinPanel(dcpId);
 }
 function openDinamikaTab() {
-  // Pokušaj otvoriti Dinamiku u novom tabu ili obavijesti korisnika
-  var dinamikaUrl = localStorage.getItem('dinamika_url') || null;
-  if (dinamikaUrl) {
-    window.open(dinamikaUrl, '_blank');
-  } else {
-    alert('Otvori Dinamiku projekata u drugom tabu ili prozoru, unesi podatke, pa se vrati i klikni Osvježi.');
+  // Otvori spremljenu poveznicu na Dinamiku; ako ne postoji, zatraži je i zapamti.
+  var dinamikaUrl = localStorage.getItem('dinamika_url') || '';
+  if (!dinamikaUrl) {
+    dinamikaUrl = prompt(
+      'Zalijepi poveznicu (URL) ili punu putanju do Dinamike projekata.\n' +
+      'Zapamtit ću je pa ćeš ubuduće samo kliknuti gumb.',
+      ''
+    );
+    if (!dinamikaUrl) return;              // korisnik odustao
+    dinamikaUrl = dinamikaUrl.trim();
+    localStorage.setItem('dinamika_url', dinamikaUrl);
   }
+  var win = window.open(dinamikaUrl, '_blank');
+  if (!win) {
+    // Neki preglednici blokiraju otvaranje lokalnih datoteka iz skripte
+    alert('Nije moguće automatski otvoriti Dinamiku. Poveznica je:\n\n' + dinamikaUrl +
+          '\n\n(Poveznicu možeš promijeniti desnim klikom na gumb → Promijeni Dinamiku.)');
+  }
+}
+
+// Promjena / brisanje spremljene poveznice na Dinamiku (desni klik na gumb)
+function promijeniDinamikaUrl() {
+  var trenutna = localStorage.getItem('dinamika_url') || '';
+  var nova = prompt('Uredi poveznicu na Dinamiku projekata (ostavi prazno za brisanje):', trenutna);
+  if (nova === null) return;              // odustao
+  nova = nova.trim();
+  if (nova) { localStorage.setItem('dinamika_url', nova); toast('Poveznica spremljena.'); }
+  else      { localStorage.removeItem('dinamika_url'); toast('Poveznica obrisana.'); }
 }
 
 // Startup - pokreni nakon što se sve učita
