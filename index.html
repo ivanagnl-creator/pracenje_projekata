@@ -2875,6 +2875,9 @@ function render() {
     osSel.innerHTML = '<option value="">Sve odgovorne osobe</option>' +
       lista.map(o => `<option value="${o}" ${o === curOs ? 'selected' : ''}>${o}</option>`).join('');
   }
+
+  // Popuni nositelje dropdown dinamički
+  const nosSel = document.getElementById('filterNositelj');
   if (nosSel) {
     const currentNos = nosSel.value;
     // Normalizirani nositelji - uzmi ključne riječi
