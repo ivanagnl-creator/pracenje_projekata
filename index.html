@@ -1931,9 +1931,8 @@ async function supaLoadP() {
       SUPA_VERZIJA_P = rows[0].verzija;
       console.log('[SUPA] Verzija u bazi:', SUPA_VERZIJA_P);
     }
-    if (rows && rows.length > 0 && rows[0].zadnji_urednik) {
-      localStorage.setItem('prac_zadnji_urednik', rows[0].zadnji_urednik);
-    }
+    ZADNJI_IZ_BAZE_P = (rows && rows.length > 0 && rows[0].zadnji_urednik) ? rows[0].zadnji_urednik : '';
+    console.log('[ZADNJI] iz baze:', ZADNJI_IZ_BAZE_P || '(prazno)');
     if (rows && rows.length > 0 && rows[0].data) {
       console.log('[SUPA] LOAD OK - projekata:',
         Array.isArray(rows[0].data) ? rows[0].data.length : '?');
@@ -1968,6 +1967,8 @@ function sakrijBazaMirovanjeP(){
   if (d) { d.remove(); document.body.style.paddingTop = ''; }
 }
 
+let ZADNJI_IZ_BAZE_P = '';
+try { localStorage.removeItem('prac_zadnji_urednik'); } catch(e) {}
 let SUPA_IMA_ZADNJEG_P = true;
 let ZADNJI_ZA_SPREMITI_P = null;
 async function supaSaveP(dataObj) {
@@ -2011,6 +2012,7 @@ async function supaSaveP(dataObj) {
     }
     SUPA_VERZIJA_P = vraceno[0].verzija;
     console.log('[SUPA] SAVE OK, nova verzija:', SUPA_VERZIJA_P);
+    if (SUPA_IMA_ZADNJEG_P && ZADNJI_ZA_SPREMITI_P) { ZADNJI_IZ_BAZE_P = ZADNJI_ZA_SPREMITI_P; prikaziZadnjegUrednikaP(); }
     return true;
   } catch(e) {
     console.error('[SUPA] SAVE IZNIMKA', e);
@@ -2562,7 +2564,6 @@ function save() {
     const ds = now.getDate().toString().padStart(2,'0')+'.'+(now.getMonth()+1).toString().padStart(2,'0')+'.'+now.getFullYear();
     const vr = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
     ZADNJI_ZA_SPREMITI_P = currentUser + ', ' + ds + ' u ' + vr;
-    localStorage.setItem('prac_zadnji_urednik', ZADNJI_ZA_SPREMITI_P);
   }
   supaSaveP(projects).then(ok => {
     if (ok === 'sudar') {
@@ -3801,7 +3802,7 @@ function uvozPodataka(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = async e => {
     try {
       const kopija = JSON.parse(e.target.result);
       if (!kopija.projekti || !Array.isArray(kopija.projekti)) {
@@ -3817,16 +3818,17 @@ function uvozPodataka(input) {
       localStorage.clear();
       localStorage.setItem('projekti', JSON.stringify(projects));
       localStorage.setItem('kap_version', APP_KAP_VERSION);
-      localStorage.setItem('prac_username', kopija.korisnik || '');
-      if (kopija.korisnik) {
-        localStorage.setItem('prac_username', kopija.korisnik);
-        currentUser = kopija.korisnik;
-        const ud = document.getElementById('current-user-display');
-        if (ud) ud.textContent = kopija.korisnik;
+      // zadrzi prijavljenog korisnika (ne preuzimaj ime iz datoteke kopije)
+      if (currentUser) localStorage.setItem('prac_username', currentUser);
+      // Spremi ispravne podatke u Supabase i PRICEKAJ da spremanje zavrsi
+      if (currentUser) {
+        const now = new Date();
+        ZADNJI_ZA_SPREMITI_P = currentUser + ' (uvoz kopije), ' + now.getDate().toString().padStart(2,'0')+'.'+(now.getMonth()+1).toString().padStart(2,'0')+'.'+now.getFullYear()+' u '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
       }
-      // Spremi ispravne podatke u Supabase
-      supaSaveP(projects);
-      alert(`✅ Uspješno učitano ${projects.length} projekata!`);
+      const okUvoz = await supaSaveP(projects);
+      if (okUvoz === true) alert(`✅ Uspješno učitano ${projects.length} projekata i spremljeno u bazu!`);
+      else if (okUvoz === 'sudar') { alert('⚠ Netko je u međuvremenu spremio izmjene. Osvježi stranicu (F5) i ponovi uvoz.'); return; }
+      else { alert('⚠ Kopija je učitana, ali spremanje u bazu NIJE uspjelo. Ne osvježavaj stranicu i javi administratoru.'); return; }
       location.reload();
     } catch(err) {
       alert('Greška pri učitavanju datoteke: ' + err.message);
@@ -4350,19 +4352,18 @@ currentUser = localStorage.getItem('prac_username') || '';
 
 // Prikaži zadnjeg urednika - poziva se nakon ucitavanja iz baze
 function prikaziZadnjegUrednikaP() {
-  var zadnjiUrednik = localStorage.getItem('prac_zadnji_urednik') || '';
-  if(zadnjiUrednik) {
-    setTimeout(function(){
-      var existing = document.getElementById('zadnji-urednik-div-prac');
-      if (existing) existing.remove();
-      const el = document.createElement('div');
-      el.id = 'zadnji-urednik-div-prac';
-      el.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:11px;color:#718096;z-index:9998;box-shadow:0 2px 8px rgba(0,0,0,0.15);max-width:280px';
-      el.innerHTML = '✏️ Zadnja izmjena: <strong>' + zadnjiUrednik + '</strong>';
-      document.body.appendChild(el);
-      setTimeout(function(){ el.style.transition='opacity 1s'; el.style.opacity='0.4'; }, 8000);
-    }, 500);
+  var existing = document.getElementById('zadnji-urednik-div-prac');
+  if (existing) existing.remove();
+  if (!ZADNJI_IZ_BAZE_P) {
+    if (!SUPA_IMA_ZADNJEG_P) console.warn('[ZADNJI] Stupac zadnji_urednik ne postoji u bazi - pokreni SQL iz uputa.');
+    return;
   }
+  const el = document.createElement('div');
+  el.id = 'zadnji-urednik-div-prac';
+  el.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:11px;color:#718096;z-index:9998;box-shadow:0 2px 8px rgba(0,0,0,0.15);max-width:280px';
+  el.innerHTML = '\u270F\uFE0F Zadnja izmjena: <strong>' + ZADNJI_IZ_BAZE_P + '</strong>';
+  document.body.appendChild(el);
+  setTimeout(function(){ el.style.transition='opacity 1s'; el.style.opacity='0.4'; }, 8000);
 }
 
 // startup handled in login script
@@ -4825,7 +4826,7 @@ window.addEventListener('DOMContentLoaded', async function() {
   }
   if (SUPA_NEDOSTUPNA_P) prikaziBazaMirovanjeP(); else sakrijBazaMirovanjeP();
   render();
-  prikaziZadnjegUrednikaP();
+  setTimeout(prikaziZadnjegUrednikaP, 500);
   // Prijava se trazi na svakom otvaranju (nova kartica/sesija).
   // Unutar iste sesije (F5) prijava se pamti da ne smeta stalnim korisnicima.
   if (sessionStorage.getItem('prac_prijava') === '1') {
