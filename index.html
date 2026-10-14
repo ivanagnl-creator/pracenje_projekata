@@ -2565,12 +2565,25 @@ function save() {
     const vr = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
     ZADNJI_ZA_SPREMITI_P = currentUser + ', ' + ds + ' u ' + vr;
   }
+  if (_jeGostSigurnoP()) { console.log('[SUPA] Gost - ne spremam u bazu'); return; }
+  posaljiUBazuP();
+}
+// Spremanja idu jedno za drugim (isto kao u Dinamici).
+var _spremanjeTeceP = false, _spremiPonovnoP = false;
+function _jeGostSigurnoP(){ try { return jeGost === true; } catch(e) { return false; } }
+function posaljiUBazuP() {
+  if (_spremanjeTeceP) { _spremiPonovnoP = true; return; }
+  _spremanjeTeceP = true;
   supaSaveP(projects).then(ok => {
+    _spremanjeTeceP = false;
     if (ok === 'sudar') {
+      _spremiPonovnoP = false;
       upozoriNaSudarP();
+      return;
     } else if (!ok) {
       console.warn('Supabase save nije uspio, podaci su spremljeni lokalno.');
     }
+    if (_spremiPonovnoP && ok === true) { _spremiPonovnoP = false; posaljiUBazuP(); }
   });
 }
 
@@ -4635,6 +4648,8 @@ function renderDinAccPreview(p, orgs) {
 <script>
 function showLoginScreenPrac() {
   var ls = document.getElementById('login-screen');
+  // ekran za prijavu je u HTML-u ugnijezden u skriveni prozor projekta - premjesti ga u body
+  if (ls && ls.parentElement !== document.body) document.body.appendChild(ls);
   if (ls) { ls.style.display = 'flex'; }
   var pass = document.getElementById('login-pass-inp');
   if (pass) pass.value = '';
@@ -4830,6 +4845,7 @@ window.addEventListener('DOMContentLoaded', async function() {
   // Prijava se trazi na svakom otvaranju (nova kartica/sesija).
   // Unutar iste sesije (F5) prijava se pamti da ne smeta stalnim korisnicima.
   if (sessionStorage.getItem('prac_prijava') === '1') {
+    var lsk = document.getElementById('login-screen'); if (lsk) lsk.style.display = 'none';
     var ud = document.getElementById('current-user-display');
     if (ud) ud.textContent = currentUser;
     jeGost = (sessionStorage.getItem('prac_gost') === '1');
