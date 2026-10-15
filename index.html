@@ -1215,10 +1215,11 @@ body.gost-mod .btn-delete {
     <option value="rok">Sortiraj: po roku</option>
     <option value="status">Sortiraj: po statusu</option>
     <option value="ustanova">Sortiraj: po ustanovi</option>
-    <option value="odgovorna">Sortiraj: po odgovornoj osobi</option>
+    <option value="odgovorna">Sortiraj: po voditelju projekta</option>
   </select>
   <select class="sort-select" id="filterDso" onchange="render()" title="Filtriraj po ustanovi"><option value="">Sve ustanove</option><option value="(prenoćište za beskućnike)">(prenoćište Za Beskućnike)</option><option value="centar za autizam">Centar Za Autizam</option><option value="centar za dugotrajnu skrb - kajzerica">Centar Za Dugotrajnu Skrb - Kajzerica</option><option value="centar za rehabilitaciju silver">Centar Za Rehabilitaciju Silver</option><option value="dječja bolnica &quot;srebrnjak&quot;">Dječja Bolnica "srebrnjak"</option><option value="dso">DSO</option><option value="dso - dizala">Dso - Dizala</option><option value="dso – uređenje sanitarnih prostora">Dso – Uređenje Sanitarnih Prostora</option><option value="dso centar">Dso Centar</option><option value="dso centar, ksaver, medveščak, maksimir">Dso Centar, Ksaver, Medveščak, Maksimir</option><option value="dso dubrava">Dso Dubrava</option><option value="dso ksaver">Dso Ksaver</option><option value="dso maksimir">Dso Maksimir</option><option value="dso medveščak">Dso Medveščak</option><option value="dso park">Dso Park</option><option value="dso peščenica">Dso Peščenica</option><option value="dso prečko">Dso Prečko</option><option value="dso sesvetski kraljevec">Dso Sesvetski Kraljevec</option><option value="dso sv. ana">Dso Sv. Ana</option><option value="dso sv. josip">Dso Sv. Josip</option><option value="dso trešnjevka">Dso Trešnjevka</option><option value="dso trnje">Dso Trnje</option><option value="dz zagreb - centar">Dz Zagreb - Centar</option><option value="dz zagreb - istok">Dz Zagreb - Istok</option><option value="dz zagreb - zapad">Dz Zagreb - Zapad</option><option value="klinika za psihijatriju sveti ivan">Klinika Za Psihijatriju Sveti Ivan</option><option value="klinika za psihijatriju vrapče">Klinika Za Psihijatriju Vrapče</option><option value="kompleks špansko">Kompleks Špansko</option><option value="nastavni zavod za hitnu medicinu">Nastavni Zavod Za Hitnu Medicinu</option><option value="poliklinika za reumatske bolesti, fizikalnu medicinu i rehabilitaciju dr. drago čop">Poliklinika Za Reumatske Bolesti, Fizikalnu Medicinu I Rehabilitaciju Dr. Drago Čop</option><option value="psihijatrijska bolnica za djecu i mladež">Psihijatrijska Bolnica Za Djecu I Mladež</option><option value="specijalna bolnica za plućne bolesti">Specijalna Bolnica Za Plućne Bolesti</option><option value="specijalna bolnica za zaštitu djece s neurorazvojnim i motoričkim smetnjama">Specijalna Bolnica Za Zaštitu Djece S Neurorazvojnim I Motoričkim Smetnjama</option><option value="stomatološka poliklinika zagreb">Stomatološka Poliklinika Zagreb</option><option value="ustanova za sveobuhvatnu skrb tigrovi">Ustanova Za Sveobuhvatnu Skrb Tigrovi</option><option value="zdravstvene ustanove">Zdravstvene Ustanove</option></select>
-  <select class="sort-select" id="filterOsoba" onchange="render()" title="Filtriraj po odgovornoj osobi (inicijali)"><option value="">Sve odgovorne osobe</option><option value="ASP">ASP</option><option value="DA">DA</option><option value="FK">FK</option><option value="HB">HB</option><option value="IG">IG</option><option value="KV">KV</option><option value="MP">MP</option><option value="MŠK">MŠK</option><option value="SČ">SČ</option><option value="SŠ">SŠ</option><option value="VS">VS</option><option value="ZŠB">ZŠB</option></select>
+  <select class="sort-select" id="filterOsoba" onchange="render()" title="Filtriraj po odgovornoj osobi GUSZBOI (V = voditelj, S = suradnik)"><option value="">Sve odgovorne osobe</option></select>
+  <select class="sort-select" id="filterUloga" onchange="render()" title="Uloga odabrane osobe na projektu" style="display:none"><option value="">U bilo kojoj ulozi</option><option value="voditelj">Samo kao voditelj</option><option value="suradnik">Samo kao suradnik</option></select>
   <div class="stats-bar">
     <span class="stat-chip" onclick="setFilter('')" id="sc-svi" style="background:#e2e8f0;color:#334155">Svi projekti</span>
     <span class="stat-chip chip-aktiv" onclick="setFilter('aktivan')" id="sc-aktiv">Aktivni: 24</span>
@@ -1313,8 +1314,14 @@ DSO Park" style="width:100%;padding:8px;border:1px solid var(--border);border-ra
       <div class="form-section">Odgovorne osobe</div>
       <div class="form-grid">
         <div class="form-group">
-          <label>Odgovorna osoba u GUSZBOI</label>
-          <input type="text" id="f-osoba-guszboi" placeholder="Ime i prezime">
+          <label>Voditelj projekta u GUSZBOI</label>
+          <input type="text" id="f-voditelj-guszboi" list="dl-osobe-guszboi" placeholder="npr. KV" autocomplete="off">
+          <datalist id="dl-osobe-guszboi"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Suradnici u GUSZBOI</label>
+          <input type="text" id="f-suradnici-guszboi" placeholder="npr. FK, DA, VS (opremanje)">
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Inicijali odvojeni zarezom; napomena u zagradi je dopuštena.</div>
         </div>
         <div class="form-group">
           <label>Odgovorna osoba u GU za izgradnju</label>
@@ -2819,15 +2826,12 @@ function cardHtml(p, i, displayRbr) {
           ${p.dsoUstanove && p.dsoUstanove.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px">${p.dsoUstanove.map(d=>`<span style="font-size:10px;background:#1d5fc422;color:#1d5fc4;border-radius:4px;padding:1px 5px;font-weight:600">${d}</span>`).join('')}</div>` : ''}
           ${p.vrstaRadova ? `<div class="card-adresa">${p.vrstaRadova}</div>` : ''}
         </div>
-        ${badgeHtml(p.status)}${jnBadgeHtml(p)}
+        ${badgeHtml(p.status)}${jnBadgeHtml(p)}${ulogaBadgeHtml(p)}
         ${p.datumZavrsen ? `<div style="font-size:11px;color:var(--blue);margin-top:4px;font-weight:600">✅ Završen · ${new Date(p.datumZavrsen).toLocaleDateString('hr-HR')}</div>` : ''}
         <div class="expand-hint" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:right">▼ detalji</div>
       </div>
       <div class="card-body">
-        <div class="card-row">
-          <div class="card-label">Odg. GUSZBOI</div>
-          <div class="card-value">${p.osobaGuszboi || '–'}</div>
-        </div>
+        ${guszboiRedoviKartica(p)}
         <div class="card-row">
           <div class="card-label">Odg. GU Obnova</div>
           <div class="card-value">${p.osobaObnova || '–'}</div>
@@ -2880,13 +2884,88 @@ const collapsedSektori = new Set();
 
 // Rastavi polje "Odgovorna osoba" na pojedinačne inicijale.
 // Npr. "VS (opremanje),  KV" → ["VS","KV"];  "MŠK, VS, ASP, KV" → ["MŠK","VS","ASP","KV"]
+// Puna imena ("Filip Kelava") ostaju u komadu; niz inicijala bez zareza ("VS FK") se rastavlja.
 function parseOsobe(str) {
   if (!str) return [];
+  const out = [];
+  rastaviOsobeUnos(str).forEach(dio => {
+    const cist = dio.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();   // makni napomene u zagradama
+    if (!cist) return;
+    const rijeci = cist.split(' ');
+    if (rijeci.every(r => /^[A-ZČĆŽŠĐ]{1,5}$/.test(r))) rijeci.forEach(r => out.push(r));
+    else out.push(cist);
+  });
+  return out;
+}
+
+// ── Uloge u GUSZBOI: voditelj projekta + suradnici ──
+// Rastavi unos na osobe, zadržavajući napomene u zagradi:
+// "VS (opremanje)  FK, DA" → ["VS (opremanje)", "FK", "DA"]
+function rastaviOsobeUnos(str) {
+  if (!str) return [];
   return String(str)
-    .replace(/\([^)]*\)/g, ' ')   // makni napomene u zagradama, npr. (opremanje)
-    .split(/[,/\s]+/)             // rastavi po zarezu, kosoj crti, razmaku
-    .map(s => s.trim())
+    .replace(/\)\s*/g, '), ')
+    .split(/[,;\/]+/)
+    .map(s => s.replace(/\s+/g, ' ').trim())
     .filter(Boolean);
+}
+
+// Vrati {voditelj, suradnici} za projekt.
+// Stari projekti (samo polje osobaGuszboi): prva osoba BEZ napomene u zagradi = voditelj, ostali = suradnici.
+function ulogeGuszboi(p) {
+  if (!p) return { voditelj: '', suradnici: '' };
+  if (p.voditeljGuszboi !== undefined || p.suradniciGuszboi !== undefined) {
+    return { voditelj: String(p.voditeljGuszboi || '').trim(), suradnici: String(p.suradniciGuszboi || '').trim() };
+  }
+  const dijelovi = rastaviOsobeUnos(p.osobaGuszboi);
+  const iV = dijelovi.findIndex(d => !d.includes('('));
+  const voditelj = iV >= 0 ? dijelovi[iV] : '';
+  const suradnici = dijelovi.filter((d, k) => k !== iV).join(', ');
+  return { voditelj, suradnici };
+}
+
+// Uloga osobe (inicijali) na projektu: 'voditelj' | 'suradnik' | ''
+function ulogaOsobe(p, osoba) {
+  if (!osoba) return '';
+  const u = ulogeGuszboi(p);
+  if (parseOsobe(u.voditelj).includes(osoba)) return 'voditelj';
+  if (parseOsobe(u.suradnici).includes(osoba)) return 'suradnik';
+  return '';
+}
+
+// Osoba odabrana u filteru (za isticanje na karticama)
+var AKTIVNA_OSOBA = '';
+
+function escOs(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Istakni inicijale odabrane osobe u tekstu
+function istakniOsobu(txt) {
+  const t = escOs(txt || '');
+  if (!AKTIVNA_OSOBA || !t) return t;
+  const re = new RegExp('(^|[^A-Za-zČĆŽŠĐčćžšđ])(' + AKTIVNA_OSOBA.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![A-Za-zČĆŽŠĐčćžšđ])', 'g');
+  return t.replace(re, '$1<mark style="background:#fde68a;color:inherit;border-radius:3px;padding:0 2px">$2</mark>');
+}
+
+// Mala oznaka uloge na kartici kad je filtrirana osoba
+function ulogaBadgeHtml(p) {
+  if (!AKTIVNA_OSOBA) return '';
+  const u = ulogaOsobe(p, AKTIVNA_OSOBA);
+  if (!u) return '';
+  const vod = u === 'voditelj';
+  return `<div style="margin-top:4px"><span style="display:inline-block;font-size:11px;font-weight:700;border-radius:10px;padding:2px 8px;background:${vod ? '#dcfce7' : '#e0f2fe'};color:${vod ? '#166534' : '#075985'}" title="${vod ? 'Voditelj projekta' : 'Suradnik na projektu'}">${vod ? '👤' : '👥'} ${escOs(AKTIVNA_OSOBA)} · ${vod ? 'voditelj' : 'suradnik'}</span></div>`;
+}
+
+// Redci "Voditelj / Suradnici" na kartici
+function guszboiRedoviKartica(p) {
+  const u = ulogeGuszboi(p);
+  return `<div class="card-row">
+          <div class="card-label">Voditelj GUSZBOI</div>
+          <div class="card-value" style="font-weight:600">${u.voditelj ? istakniOsobu(u.voditelj) : '–'}</div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Suradnici GUSZBOI</div>
+          <div class="card-value">${u.suradnici ? istakniOsobu(u.suradnici) : '–'}</div>
+        </div>`;
 }
 
 function render() {
@@ -2902,12 +2981,27 @@ function render() {
   const osSel = document.getElementById('filterOsoba');
   if (osSel) {
     const curOs = osSel.value;
-    const set = new Set();
-    projects.filter(p => !p.archived).forEach(p => parseOsobe(p.osobaGuszboi).forEach(o => set.add(o)));
-    const lista = [...set].sort((a, b) => a.localeCompare(b, 'hr'));
+    const broj = new Map();   // osoba → {v, s}
+    const dodaj = (o, k) => { if (!broj.has(o)) broj.set(o, { v: 0, s: 0 }); broj.get(o)[k]++; };
+    projects.filter(p => !p.archived).forEach(p => {
+      const u = ulogeGuszboi(p);
+      const vod = new Set(parseOsobe(u.voditelj));
+      vod.forEach(o => dodaj(o, 'v'));
+      new Set(parseOsobe(u.suradnici)).forEach(o => { if (!vod.has(o)) dodaj(o, 's'); });
+    });
+    const lista = [...broj.keys()].sort((a, b) => a.localeCompare(b, 'hr'));
     osSel.innerHTML = '<option value="">Sve odgovorne osobe</option>' +
-      lista.map(o => `<option value="${o}" ${o === curOs ? 'selected' : ''}>${o}</option>`).join('');
+      lista.map(o => { const b = broj.get(o); return `<option value="${escOs(o)}" ${o === curOs ? 'selected' : ''}>${escOs(o)} — vodi ${b.v}, surađuje ${b.s}</option>`; }).join('');
+    if (curOs && !broj.has(curOs)) osSel.value = '';
+    // Prijedlozi u obrascu
+    const dl = document.getElementById('dl-osobe-guszboi');
+    if (dl) dl.innerHTML = lista.map(o => `<option value="${escOs(o)}">`).join('');
   }
+  const ulSel = document.getElementById('filterUloga');
+  const fOsobaAkt = (osSel?.value || '').trim();
+  if (ulSel) { ulSel.style.display = fOsobaAkt ? '' : 'none'; if (!fOsobaAkt) ulSel.value = ''; }
+  const fUloga = fOsobaAkt ? (ulSel?.value || '') : '';
+  AKTIVNA_OSOBA = fOsobaAkt;
 
   // Popuni nositelje dropdown dinamički
   const nosSel = document.getElementById('filterNositelj');
@@ -3032,8 +3126,10 @@ function render() {
     }
 
     // Filter po odgovornoj osobi (pojedinačni inicijali) — pogodak ako je osoba u popisu
-    if (fOsoba) {
-      if (!parseOsobe(p.osobaGuszboi).includes(fOsoba)) return false;
+    if (fOsobaAkt) {
+      const ul = ulogaOsobe(p, fOsobaAkt);
+      if (!ul) return false;
+      if (fUloga && ul !== fUloga) return false;
     }
 
     // Pretraživanje - uključi rbr, sve polja teksta i napomene
@@ -3042,7 +3138,7 @@ function render() {
       const radTxt = (p.radovi||[]).map(n=>n.txt||'').join(' ');
       const txt = [
         p.ustanova, p.nazivUstanove, p.vrstaRadova,
-        p.nositelj, p.osobaGuszboi, p.osobaObnova,
+        p.nositelj, p.osobaGuszboi, p.voditeljGuszboi, p.suradniciGuszboi, p.osobaObnova,
         p.rbr, p.status, napTxt, radTxt,
         (p.dsoUstanove||[]).join(' ')
       ].join(' ').toLowerCase();
@@ -3201,10 +3297,10 @@ var collapsedOsobe = new Set();
 
 // Prikaz projekata grupiranih po odgovornoj osobi (GUSZBOI), sa brojem projekata po osobi
 function renderPoOdgovornoj(filtered, main) {
-  // Grupiraj po nazivu odgovorne osobe (onako kako je upisano)
-  const grupe = new Map();   // naziv → [projekti]
+  // Grupiraj po voditelju projekta (GUSZBOI)
+  const grupe = new Map();   // voditelj → [projekti]
   filtered.forEach(p => {
-    const osoba = (p.osobaGuszboi || '').trim() || '(nije dodijeljeno)';
+    const osoba = ulogeGuszboi(p).voditelj || '(nije dodijeljeno)';
     if (!grupe.has(osoba)) grupe.set(osoba, []);
     grupe.get(osoba).push(p);
   });
@@ -3241,8 +3337,13 @@ function renderPoOdgovornoj(filtered, main) {
       <div class="sektor-header" onclick="toggleOsoba('${safeKey}')">
         <div class="sektor-icon">👤</div>
         <div class="sektor-info">
-          <div class="sektor-naziv">${osoba}</div>
-          <div class="sektor-meta">${grp.length} projekt${grp.length === 1 ? '' : 'a'}</div>
+          <div class="sektor-naziv">${osoba === '(nije dodijeljeno)' ? 'Bez voditelja projekta' : 'Voditelj: ' + escOs(osoba)}</div>
+          <div class="sektor-meta">vodi ${grp.length} projekt${grp.length === 1 ? '' : 'a'}${(() => {
+            if (osoba === '(nije dodijeljeno)') return '';
+            const ini = parseOsobe(osoba)[0];
+            const sur = filtered.filter(x => ulogaOsobe(x, ini) === 'suradnik').length;
+            return sur ? ' · suradnik na još ' + sur : '';
+          })()}</div>
         </div>
         <span class="sektor-count">${grp.length}</span>
         <span class="sektor-toggle ${collapsed ? 'collapsed' : ''}">▼</span>
@@ -3342,10 +3443,7 @@ function archivedCardHtml(p, i) {
         ${badgeHtml(p.status)}
       </div>
       <div class="card-body">
-        <div class="card-row">
-          <div class="card-label">Odg. GUSZBOI</div>
-          <div class="card-value">${p.osobaGuszboi || '–'}</div>
-        </div>
+        ${guszboiRedoviKartica(p)}
         <div class="card-row">
           <div class="card-label">Odg. GU Obnova</div>
           <div class="card-value">${p.osobaObnova || '–'}</div>
@@ -3431,7 +3529,8 @@ function openModal(project = null) {
     'f-rbr':              project?.rbr || '',
     'f-ustanova':         project?.ustanova || '',
     'f-vrsta':            project?.vrstaRadova || '',
-    'f-osoba-guszboi':    project?.osobaGuszboi || '',
+    'f-voditelj-guszboi': ulogeGuszboi(project).voditelj,
+    'f-suradnici-guszboi': ulogeGuszboi(project).suradnici,
     'f-osoba-obnova':     project?.osobaObnova || '',
     'f-status':           (() => {
       const knownStatuses = ['aktivan','izrada_pd','ceka','zavrsen','problem','jn',''];
@@ -3616,7 +3715,7 @@ function pregledKartice(){
     '<div style="color:#666;font-size:13px">'+(p.vrstaRadova||'')+' | Status: <strong style="color:#1a4ea8">'+(p.status||'—')+'</strong> | '+new Date().toLocaleDateString('hr-HR')+'</div></div>'+
     sek('Osnovni podaci','<div class="pg">'+
       row('Sektor',p.sektor)+row('R.br.',p.rbr)+row('Vrsta radova',p.vrstaRadova)+
-      row('Osoba GUSZBOI',p.osobaGuszboi)+row('Osoba ustanova',p.osobaObnova)+row('Nositelj',p.nositelj)+
+      row('Voditelj GUSZBOI',ulogeGuszboi(p).voditelj)+row('Suradnici GUSZBOI',ulogeGuszboi(p).suradnici)+row('Osoba ustanova',p.osobaObnova)+row('Nositelj',p.nositelj)+
       row('Kapitalni',(p.kapitalni===true||p.kapitalni==='True')?'Da':'Ne')+
       row('Datum završetka',fd(p.datumZavrsen)!=='—'?fd(p.datumZavrsen):((p.rokInv&&p.rokInv.length&&p.rokInv[0].txt)?p.rokInv[0].txt:'—'))+
       '</div>')+
@@ -3720,7 +3819,8 @@ function ispisModalPDF() {
     row('Sektor', p.sektor) +
     row('R.br.', p.rbr) +
     row('Vrsta radova', p.vrstaRadova) +
-    row('Osoba GUSZBOI', p.osobaGuszboi) +
+    row('Voditelj GUSZBOI', ulogeGuszboi(p).voditelj) +
+    row('Suradnici GUSZBOI', ulogeGuszboi(p).suradnici) +
     row('Osoba ustanova', p.osobaObnova) +
     row('Nositelj', p.nositelj) +
     row('Kapitalni', (p.kapitalni === true || p.kapitalni === 'True') ? 'Da' : 'Ne') +
@@ -4048,7 +4148,9 @@ function saveProject() {
     nazivUstanove:   get('f-naziv-ustanove'),
     dsoUstanove:     (document.getElementById('f-dso-ustanove')?.value||'').split('\n').map(s=>s.trim()).filter(Boolean),
     vrstaRadova:     get('f-vrsta'),
-    osobaGuszboi:    get('f-osoba-guszboi'),
+    voditeljGuszboi: get('f-voditelj-guszboi'),
+    suradniciGuszboi: get('f-suradnici-guszboi'),
+    osobaGuszboi:    [get('f-voditelj-guszboi'), get('f-suradnici-guszboi')].filter(Boolean).join(', '),
     osobaObnova:     get('f-osoba-obnova'),
     status:          (() => {
       const s = get('f-status');
@@ -4219,7 +4321,7 @@ async function izvozExcel(samoZadnji = false) {
 
   const allHeaders = [
     'Rbr.', 'Ustanova / adresa', 'Vrsta radova', 'Nositelj aktivnosti',
-    'Odg. osoba GUSZBOI', 'Odg. osoba GU za izgradnju', 'Status projekta',
+    'Voditelj GUSZBOI', 'Suradnici GUSZBOI', 'Odg. osoba GU za izgradnju', 'Status projekta',
     'Status i rok (proj. zadatak / gl.izv. projekt / radovi)',
     'Status i rok: opremanje',
     'Sljedeća aktivnost i rok', 'Rok završetka investicije',
@@ -4229,7 +4331,7 @@ async function izvozExcel(samoZadnji = false) {
 
   const toRow = p => [
     p.rbr||'', p.ustanova||'', p.vrstaRadova||'', p.nositelj||'',
-    p.osobaGuszboi||'', p.osobaObnova||'',
+    ulogeGuszboi(p).voditelj, ulogeGuszboi(p).suradnici, p.osobaObnova||'',
     STATUS_LABEL[p.status]||'', diaryStr(p.radovi),
     diaryStr(p.opremanje), diaryStr(p.sljedeca), diaryStr(p.rokInv),
     p.vrijednostLog?.[0]?.txt || p.vrijednost||'', p.sufinanciranje||'',
@@ -4245,17 +4347,20 @@ async function izvozExcel(samoZadnji = false) {
     zdravstvo: 'E8F0FB', socijala: 'F0EBFF',
     energetska: 'E4F5EC', ostalo: 'F3F4F6', svi: 'EEF1F8'
   };
-  const COL_WIDTHS = [6, 28, 22, 18, 18, 18, 16, 45, 45, 45, 28, 18, 18, 22, 45, 45];
+  const COL_WIDTHS = [6, 28, 22, 18, 9, 11, 18, 16, 45, 45, 45, 28, 18, 18, 22, 45, 45];
 
   const wb = new ExcelJS.Workbook();
   wb.creator = 'Grad Zagreb';
   wb.created = new Date();
 
   function addSheet(sheetName, headers, rows, sektorKey) {
-    // Stupci koji se sakrivaju u skracenom izvozu (0-based): 11=Ugovorena, 12=Sufinancirano, 13=Proracun
-    const SAKRIJ = samoZadnji ? [11,12,13] : [];
+    // Pomak stupaca: zbirni sheet ima dodatni stupac 'Sektor' na pocetku
+    const POMAK = headers.length - allHeaders.length;
+    // Stupci koji se sakrivaju u skracenom izvozu (0-based): 12=Ugovorena, 13=Sufinancirano, 14=Proracun
+    const SAKRIJ = samoZadnji ? [12,13,14].map(i => i + POMAK) : [];
     // Uze sirine za skraceni izvoz
-    const SIRINE = samoZadnji ? [5,24,18,10,9,9,14,32,32,32,20,16,16,18,32,32] : COL_WIDTHS;
+    const SIRINE_OSN = samoZadnji ? [5,24,18,10,8,9,9,14,32,32,32,20,16,16,18,32,32] : COL_WIDTHS;
+    const SIRINE = POMAK > 0 ? [...Array(POMAK).fill(14), ...SIRINE_OSN] : SIRINE_OSN;
     const hdrColor = 'FF' + (SEKTOR_BOJE[sektorKey] || SEKTOR_BOJE.svi);
     const altColor = 'FF' + (ALT_BOJE[sektorKey] || ALT_BOJE.svi);
 
@@ -4276,7 +4381,7 @@ async function izvozExcel(samoZadnji = false) {
     ws.pageSetup.printTitlesRow = '1:1';
 
     ws.columns = headers.map((h, i) => ({
-      header: '', key: `c${i}`, width: SIRINE[i] || 20,
+      key: `c${i}`, width: SIRINE[i] || 20,   // bez 'header' - inace ExcelJS doda prazan 1. red
       hidden: SAKRIJ.includes(i)
     }));
 
@@ -4317,7 +4422,7 @@ async function izvozExcel(samoZadnji = false) {
       rowData.forEach((cell, ci) => {
         const txt = String(cell||'').trimEnd();
         if (!txt) return;
-        const w = COL_WIDTHS[ci] || 20;
+        const w = SIRINE[ci] || 20;
         const lines = txt.split('\n').reduce((s, seg) =>
           s + Math.max(1, Math.ceil(seg.length / (w * 0.9))), 0);
         if (lines > maxLines) maxLines = lines;
