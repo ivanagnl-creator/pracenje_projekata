@@ -396,6 +396,9 @@ body {
 .badge-ceka   { background: var(--amber-light); color: var(--amber); }
 .badge-zavrs  { background: var(--blue-light);  color: var(--blue); }
 .badge-prob   { background: var(--rose-light);  color: var(--rose); }
+.badge-jpt    { background: #e0f2f1; color: #00695c; }
+.badge-odust  { background: #eceff1; color: #455a64; }
+.badge-slob   { background: #f3e8ff; color: #6b21a8; }
 .badge-def    { background: var(--gray);        color: var(--muted); }
 .badge-pd          { background: #e0f2fe; color: #0369a1; }
 .badge-ishodjenje  { background: #fef9c3; color: #854d0e; }
@@ -1180,7 +1183,7 @@ body.gost-mod .btn-delete {
       <button onclick="openDinamikaTab()" oncontextmenu="event.preventDefault();promijeniDinamikaUrl()" title="Otvori Dinamiku projekata (desni klik: promijeni poveznicu)" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#1a4a8a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-right:6px">
   📋 Otvori Dinamiku
 </button>
-<button class="btn-archive-toggle" id="btnArchiveToggle" onclick="toggleArchiveView()" title="Završeni projekti">✅ Završeni <span id="archiveCount" style="background:rgba(0,0,0,.15);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:2px">5</span></button>
+<button class="btn-archive-toggle" id="btnArchiveToggle" onclick="toggleArchiveView()" title="Završeni i obustavljeni projekti">✅ Završeni <span id="archiveCount" style="background:rgba(0,0,0,.15);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:2px">0</span><span id="archiveCountObust" title="Obustavljeni projekti" style="display:none;background:#e2e8f0;color:#475569;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px">✖ 0</span></button>
 <button class="btn-new" onclick="openModal()">＋ Novi projekt</button>
     </div>
   </div>
@@ -1204,6 +1207,9 @@ body.gost-mod .btn-delete {
     <option value="zavrsen">Završeno</option>
     <option value="problem">Problem / Kašnjenje</option>
     <option value="jn">Javna nabava</option>
+    <option value="jpt">Odnosi s javnopravnim tijelima</option>
+    <option value="odustajanje">Obustavljeno</option>
+    <option value="ostalo">Ostalo (slobodni unos)</option>
     <option value="rok_istekao" style="display:none">Rok istekao</option>
   </select>
   <select class="filter-select" id="filterNositelj" onchange="render()"><option value="">Svi nositelji</option><option value="GU za izgradnju">GU za izgradnju</option><option value="GU za izgradnju + GUSZBOI">GU za izgradnju + GUSZBOI</option><option value="GU za izgradnju - kapitalne investicije">GU za izgradnju - kapitalne investicije</option><option value="GUSZBOI">GUSZBOI</option><option value="Ustanove">Ustanove</option></select>
@@ -1220,6 +1226,8 @@ body.gost-mod .btn-delete {
   <select class="sort-select" id="filterDso" onchange="render()" title="Filtriraj po ustanovi"><option value="">Sve ustanove</option><option value="(prenoćište za beskućnike)">(prenoćište Za Beskućnike)</option><option value="centar za autizam">Centar Za Autizam</option><option value="centar za dugotrajnu skrb - kajzerica">Centar Za Dugotrajnu Skrb - Kajzerica</option><option value="centar za rehabilitaciju silver">Centar Za Rehabilitaciju Silver</option><option value="dječja bolnica &quot;srebrnjak&quot;">Dječja Bolnica "srebrnjak"</option><option value="dso">DSO</option><option value="dso - dizala">Dso - Dizala</option><option value="dso – uređenje sanitarnih prostora">Dso – Uređenje Sanitarnih Prostora</option><option value="dso centar">Dso Centar</option><option value="dso centar, ksaver, medveščak, maksimir">Dso Centar, Ksaver, Medveščak, Maksimir</option><option value="dso dubrava">Dso Dubrava</option><option value="dso ksaver">Dso Ksaver</option><option value="dso maksimir">Dso Maksimir</option><option value="dso medveščak">Dso Medveščak</option><option value="dso park">Dso Park</option><option value="dso peščenica">Dso Peščenica</option><option value="dso prečko">Dso Prečko</option><option value="dso sesvetski kraljevec">Dso Sesvetski Kraljevec</option><option value="dso sv. ana">Dso Sv. Ana</option><option value="dso sv. josip">Dso Sv. Josip</option><option value="dso trešnjevka">Dso Trešnjevka</option><option value="dso trnje">Dso Trnje</option><option value="dz zagreb - centar">Dz Zagreb - Centar</option><option value="dz zagreb - istok">Dz Zagreb - Istok</option><option value="dz zagreb - zapad">Dz Zagreb - Zapad</option><option value="klinika za psihijatriju sveti ivan">Klinika Za Psihijatriju Sveti Ivan</option><option value="klinika za psihijatriju vrapče">Klinika Za Psihijatriju Vrapče</option><option value="kompleks špansko">Kompleks Špansko</option><option value="nastavni zavod za hitnu medicinu">Nastavni Zavod Za Hitnu Medicinu</option><option value="poliklinika za reumatske bolesti, fizikalnu medicinu i rehabilitaciju dr. drago čop">Poliklinika Za Reumatske Bolesti, Fizikalnu Medicinu I Rehabilitaciju Dr. Drago Čop</option><option value="psihijatrijska bolnica za djecu i mladež">Psihijatrijska Bolnica Za Djecu I Mladež</option><option value="specijalna bolnica za plućne bolesti">Specijalna Bolnica Za Plućne Bolesti</option><option value="specijalna bolnica za zaštitu djece s neurorazvojnim i motoričkim smetnjama">Specijalna Bolnica Za Zaštitu Djece S Neurorazvojnim I Motoričkim Smetnjama</option><option value="stomatološka poliklinika zagreb">Stomatološka Poliklinika Zagreb</option><option value="ustanova za sveobuhvatnu skrb tigrovi">Ustanova Za Sveobuhvatnu Skrb Tigrovi</option><option value="zdravstvene ustanove">Zdravstvene Ustanove</option></select>
   <select class="sort-select" id="filterOsoba" onchange="render()" title="Filtriraj po odgovornoj osobi GUSZBOI (V = voditelj, S = suradnik)"><option value="">Sve odgovorne osobe</option></select>
   <select class="sort-select" id="filterUloga" onchange="render()" title="Uloga odabrane osobe na projektu" style="display:none"><option value="">U bilo kojoj ulozi</option><option value="voditelj">Samo kao voditelj</option><option value="suradnik">Samo kao suradnik</option></select>
+  <select class="sort-select" id="filterGodina" onchange="render()" title="Godina pokretanja projekta"><option value="">Sve godine pokretanja</option></select>
+  <select class="sort-select" id="filterProracun" onchange="render()" title="Godina u kojoj projekt ima planirana sredstva u Proračunu GZ"><option value="">Svi proračuni (godina)</option></select>
   <div class="stats-bar">
     <span class="stat-chip" onclick="setFilter('')" id="sc-svi" style="background:#e2e8f0;color:#334155">Svi projekti</span>
     <span class="stat-chip chip-aktiv" onclick="setFilter('aktivan')" id="sc-aktiv">Aktivni: 24</span>
@@ -1228,6 +1236,9 @@ body.gost-mod .btn-delete {
     <span class="stat-chip chip-jn" onclick="setFilter('jn')" id="sc-jn">Javna nabava: 12</span>
     <span class="stat-chip chip-ceka" onclick="setFilter('ceka')" id="sc-ceka">Čeka: 8</span>
     <span class="stat-chip chip-zavrs" onclick="setFilter('zavrsen')" id="sc-zavrs">Završeno: 5</span>
+    <span class="stat-chip" onclick="setFilter('jpt')" id="sc-jpt" style="background:#e0f2f1;color:#00695c;display:none"></span>
+    <span class="stat-chip" onclick="setFilter('odustajanje')" id="sc-odust" style="background:#eceff1;color:#455a64;display:none"></span>
+    <span class="stat-chip" onclick="setFilter('ostalo')" id="sc-ostalo" style="background:#f3e8ff;color:#6b21a8;display:none"></span>
     <span class="stat-chip chip-prob" onclick="setFilter('problem')" id="sc-prob">Problem: 1</span>
   </div>
 </div>
@@ -1239,7 +1250,7 @@ body.gost-mod .btn-delete {
   <div class="archive-header">
     <div class="archive-header-icon">✅</div>
     <div>
-      <div class="archive-header-title">Završeni projekti</div>
+      <div class="archive-header-title">Završeni i obustavljeni projekti</div>
       <div class="archive-header-sub" id="archiveSubtitle">5 završenih projekata</div>
     </div>
   </div>
@@ -1309,6 +1320,11 @@ DSO Park" style="width:100%;padding:8px;border:1px solid var(--border);border-ra
           <label>Vrsta radova</label>
           <input type="text" id="f-vrsta" placeholder="npr. sanacija krova, adaptacija, rekonstrukcija, izgradnja">
         </div>
+        <div class="form-group">
+          <label>Godina pokretanja projekta</label>
+          <input type="number" id="f-godina-pokretanja" min="2000" max="2100" step="1" placeholder="npr. 2026" oninput="var h=document.getElementById('godina-prijedlog');if(h)h.style.display='none'">
+          <div id="godina-prijedlog" style="display:none;font-size:11px;color:#b45309;margin-top:3px">Prijedlog iz najstarijeg datuma u dnevnicima — provjeri i ispravi ako treba.</div>
+        </div>
       </div>
 
       <div class="form-section">Odgovorne osobe</div>
@@ -1372,7 +1388,7 @@ DSO Park" style="width:100%;padding:8px;border:1px solid var(--border);border-ra
   <div style="display: block; padding: 16px;">
     <div class="form-grid"><div class="form-group full">
           <label>Status projekta</label>
-          <select id="f-status" onchange="toggleJnField();toggleZavrsenField()">
+          <select id="f-status" onchange="toggleZavrsenField()">
             <option value="">– odaberi –</option>
             <option value="aktivan">Aktivni radovi</option>
             <option value="izrada_pd">Izrada projektne dokumentacije</option>
@@ -1381,8 +1397,13 @@ DSO Park" style="width:100%;padding:8px;border:1px solid var(--border);border-ra
             <option value="zavrsen">Završeno</option>
             <option value="problem">Problem / Kašnjenje</option>
             <option value="jn">Javna nabava</option>
+            <option value="jpt">Odnosi s javnopravnim tijelima</option>
+            <option value="odustajanje">Obustavljeno</option>
+            <option value="ostalo">Ostalo (slobodni unos)</option>
           </select>
-
+          <div id="status-slobodni-group" style="display:none;margin-top:6px">
+            <input type="text" id="f-status-slobodni" placeholder="Upiši status projekta..." style="width:100%">
+          </div>
         </div>
 
         <div class="form-group full" id="zavrsen-datum-group" style="display:none">
@@ -1434,7 +1455,9 @@ DSO Park" style="width:100%;padding:8px;border:1px solid var(--border);border-ra
               <option value="Izrada projektne dokumentacije">Izrada projektne dokumentacije</option>
               <option value="Gl. i izv. projekt">Gl. i izv. projekt</option>
               <option value="Radovi">Radovi</option>
-              <option value="_custom">Slobodni unos</option>
+              <option value="Odnosi s javnopravnim tijelima">Odnosi s javnopravnim tijelima</option>
+              <option value="Obustavljeno">Obustavljeno</option>
+              <option value="_custom">Slobodni unos...</option>
             </select>
             <input type="text" id="f-status-custom" placeholder="Upiši vlastiti opis..." style="display: none;">
             <input type="text" id="f-status-rok" placeholder="Rok (opis, npr. Prosinac 2027.)">
@@ -2625,6 +2648,8 @@ const STATUS_MAP = {
   zavrsen:   { label: 'Završeno',                    cls: 'badge-zavrs' },
   problem:   { label: 'Problem / Kašnjenje',         cls: 'badge-prob'  },
   jn:        { label: 'Javna nabava',                cls: 'badge-jn'    },
+  jpt:       { label: 'Odnosi s javnoprav. tijelima', cls: 'badge-jpt'  },
+  odustajanje:{ label: 'Obustavljeno',                 cls: 'badge-odust' },
   '':        { label: '–',                           cls: 'badge-def'   },
 };
 
@@ -2655,7 +2680,19 @@ function jnBadgeHtml(p) {
   return h;
 }
 
+// Puni naziv statusa (za Excel, pregled) - slobodni status vraca se kako je upisan
+function statusNaziv(st) {
+  const puni = { jpt: 'Odnosi s javnopravnim tijelima' };
+  if (!st) return '';
+  if (puni[st]) return puni[st];
+  return STATUS_MAP[st] ? STATUS_MAP[st].label : String(st);
+}
 function badgeHtml(status) {
+  // slobodno upisani status prikazuje se onako kako je upisan
+  if (status && !STATUS_MAP[status]) {
+    const t = String(status).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+    return `<span class="card-status-badge badge-slob">${t}</span>`;
+  }
   const s = STATUS_MAP[status] || STATUS_MAP[''];
   return `<span class="card-status-badge ${s.cls}">${s.label}</span>`;
 }
@@ -2810,6 +2847,65 @@ function highlightRokoviUModalu() {
   });
 }
 
+
+// ── GODINE ──────────────────────────────────────────────────────
+function godinaIz(t) { const m = String(t || '').match(/(20\d{2})/); return m ? m[1] : ''; }
+// Godina završetka/obustave: datum završetka ili datum premještanja u arhivu
+function godinaZavrsetka(p) { return godinaIz(p.datumZavrsen) || godinaIz(p.archivedDate) || ''; }
+// Godine u kojima projekt ima sredstva u Proračunu GZ
+function godineProracuna(p) { return [...new Set((p.proracunGodine || []).map(r => godinaIz(r.godina)).filter(Boolean))]; }
+// Prijedlog godine pokretanja: najstarija godina spomenuta u dnevnicima projekta
+function prijedlogGodine(p) {
+  const god = [];
+  ['radovi','jnRadovi','opremanje','sljedeca','rokInv','napomene','zadnja'].forEach(k => {
+    (p[k] || []).forEach(e => {
+      [e.txt].forEach(t => {   // samo datumi iz teksta (datum unosa kod uvezenih projekata nije pouzdan)
+        String(t || '').replace(/\b(20[12]\d)\b/g, (_, y) => { god.push(+y); return _; });
+      });
+    });
+  });
+  // bez datuma u tekstu: kad je projekt upisan u aplikaciju
+  if (!god.length && typeof p.id === 'number' && p.id > 1e12) god.push(new Date(p.id).getFullYear());
+  const ok = god.filter(y => y >= 2015 && y <= new Date().getFullYear());   // pokretanje ne moze biti u buducnosti
+  return ok.length ? String(Math.min(...ok)) : '';
+}
+
+// ── REDNI BROJEVI ───────────────────────────────────────────────
+// Redoslijed u sektoru: kapitalni (K1, K2...) pa GUSZBOI, unutar grupe po spremljenom broju.
+function _rbrBroj(p) { return parseInt(String(p.rbr || '').replace(/[^0-9]/g, '')) || 0; }
+function poredajProjekte(arr) {
+  return arr.slice().sort((a, b) => {
+    if (!!a.kapitalni !== !!b.kapitalni) return a.kapitalni ? -1 : 1;
+    const aIma = !!String(a.rbr || '').trim(), bIma = !!String(b.rbr || '').trim();
+    if (aIma !== bIma) return aIma ? -1 : 1;
+    return _rbrBroj(a) - _rbrBroj(b);
+  });
+}
+// Zatvoren projekt = zavrsen (arhiviran ili status Zavrseno) ili odustalo se
+function jeZatvoren(p) { return !!p.archived || p.status === 'zavrsen' || p.status === 'odustajanje'; }
+function jeOdustao(p)  { return p.status === 'odustajanje'; }
+// Redni brojevi unutar sektora - isti u aplikaciji i u Excelu, bez rupa:
+// kapitalni K1, K2, K3...  GUSZBOI 1, 2, 3...  Zavrseni i odustali ne dobivaju broj.
+// Ne ovisi o filterima ni pretrazi. Spremljeni p.rbr se NE mijenja - sluzi samo za redoslijed.
+// Oznaka za prikaz: "K3" / "5." / "" (zatvoren projekt)
+function oznakaProjekta(p) {
+  const r = rbrPrikaz(p);
+  if (!r) return '';
+  return p.kapitalni ? r : r + '.';
+}
+let _RBR_MAPA = null;
+function rbrPrikaz(p) {
+  if (!_RBR_MAPA) {
+    _RBR_MAPA = new Map();
+    getSektori().forEach(s => {
+      let n = 0, k = 0;
+      poredajProjekte(projects.filter(x => (x.sektor || 'ostalo') === s.key && !jeZatvoren(x)))
+        .forEach(x => _RBR_MAPA.set(x.id, x.kapitalni ? 'K' + (++k) : String(++n)));
+    });
+  }
+  return _RBR_MAPA.get(p.id) || '';
+}
+
 function cardHtml(p, i, displayRbr) {
   const rs = rokStatus(p);
   const rokClass = rs === 'kritican' ? 'rok-kritican' : '';
@@ -2821,7 +2917,7 @@ function cardHtml(p, i, displayRbr) {
     <div class="card ${rokClass}" id="${cardId}" style="animation-delay:${i*0.04}s">
       <div class="card-top" onclick="toggleCard('${p.id}')" title="Klikni za detalje">
         <div>
-          <div class="card-rbr">${p.kapitalni ? (p.rbr || '#') : ('Projekt ' + (displayRbr !== undefined ? displayRbr : (p.rbr || '#')))}</div>
+          <div class="card-rbr">${p.kapitalni ? (rbrPrikaz(p) || 'K –') : ('Projekt ' + (rbrPrikaz(p) || '–'))}${p.godinaPokretanja ? ` <span style="font-weight:500;opacity:.75" title="Godina pokretanja">· ${p.godinaPokretanja}.</span>` : ''}</div>
           <div class="card-ustanova">${p.ustanova || '–'}${rokBadge}</div>
           ${p.dsoUstanove && p.dsoUstanove.length > 0 ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:3px">${p.dsoUstanove.map(d=>`<span style="font-size:10px;background:#1d5fc422;color:#1d5fc4;border-radius:4px;padding:1px 5px;font-weight:600">${d}</span>`).join('')}</div>` : ''}
           ${p.vrstaRadova ? `<div class="card-adresa">${p.vrstaRadova}</div>` : ''}
@@ -2969,6 +3065,7 @@ function guszboiRedoviKartica(p) {
 }
 
 function render() {
+  _RBR_MAPA = null;   // redni brojevi se racunaju iznova
   const q     = document.getElementById('searchInput').value.toLowerCase();
   const fStat = document.getElementById('filterStatus').value;
   const fNos  = document.getElementById('filterNositelj').value;
@@ -2997,6 +3094,27 @@ function render() {
     const dl = document.getElementById('dl-osobe-guszboi');
     if (dl) dl.innerHTML = lista.map(o => `<option value="${escOs(o)}">`).join('');
   }
+  // Filteri po godini pokretanja i godini proračuna
+  const gSel = document.getElementById('filterGodina');
+  if (gSel) {
+    const cur = gSel.value, aktivni = projects.filter(p => !p.archived);
+    const br = {}; let bez = 0;
+    aktivni.forEach(p => { const g = String(p.godinaPokretanja || ''); if (g) br[g] = (br[g] || 0) + 1; else bez++; });
+    gSel.innerHTML = '<option value="">Sve godine pokretanja</option>' +
+      Object.keys(br).sort().map(g => `<option value="${g}">Pokrenuto ${g}. (${br[g]})</option>`).join('') +
+      (bez ? `<option value="nema">Godina nije upisana (${bez})</option>` : '');
+    gSel.value = (cur && (br[cur] || (cur === 'nema' && bez))) ? cur : '';
+  }
+  const prSel = document.getElementById('filterProracun');
+  if (prSel) {
+    const cur = prSel.value, br = {};
+    projects.filter(p => !p.archived).forEach(p => godineProracuna(p).forEach(g => br[g] = (br[g] || 0) + 1));
+    prSel.innerHTML = '<option value="">Svi proračuni (godina)</option>' +
+      Object.keys(br).sort().map(g => `<option value="${g}">Proračun ${g}. (${br[g]})</option>`).join('');
+    prSel.value = (cur && br[cur]) ? cur : '';
+  }
+  const fGodina = gSel ? gSel.value : '', fProracun = prSel ? prSel.value : '';
+
   const ulSel = document.getElementById('filterUloga');
   const fOsobaAkt = (osSel?.value || '').trim();
   if (ulSel) { ulSel.style.display = fOsobaAkt ? '' : 'none'; if (!fOsobaAkt) ulSel.value = ''; }
@@ -3083,10 +3201,13 @@ function render() {
     if (!fStat && p.archived) return false;
     // S filterom zavrsen - prikaži i archived i status=zavrsen
     if (fStat === 'rok_istekao') { if (rokStatus(p) !== 'kritican') return false; return true; }
-    if (fStat === 'zavrsen' && !p.archived && p.status !== 'zavrsen') return false;
+    if (fStat === 'zavrsen' && (jeOdustao(p) || (!p.archived && p.status !== 'zavrsen'))) return false;
+    // Odustajanje - prikaži i arhivirane odustale
+    if (fStat === 'odustajanje') { if (!jeOdustao(p)) return false; }
     // Ostali filteri - sakrij archived
-    if (fStat && fStat !== 'zavrsen' && p.archived) return false;
-    if (fStat && fStat !== 'zavrsen' && p.status !== fStat) return false;
+    else if (fStat && fStat !== 'zavrsen' && p.archived) return false;
+    if (fStat === 'ostalo') { if (STATUS_MAP[p.status || ''] !== undefined) return false; }
+    else if (fStat && fStat !== 'zavrsen' && fStat !== 'odustajanje' && p.status !== fStat) return false;
 
     // Filter po nositelju - usporedi s normaliziranim ključem
     if (fNos) {
@@ -3105,6 +3226,11 @@ function render() {
       }
       if (!match) return false;
     }
+
+    // Filter po godini pokretanja / godini proračuna
+    if (fGodina === 'nema' && p.godinaPokretanja) return false;
+    if (fGodina && fGodina !== 'nema' && String(p.godinaPokretanja || '') !== fGodina) return false;
+    if (fProracun && !godineProracuna(p).includes(fProracun)) return false;
 
     // Filter po DSO ustanovi
     if (fDso) {
@@ -3165,16 +3291,18 @@ function render() {
     });
   }
 
-  const counts = { aktivan:0, izrada_pd:0, ishodjenje:0, ceka:0, zavrsen:0, problem:0, jn:0 };
+  const counts = { aktivan:0, izrada_pd:0, ishodjenje:0, ceka:0, zavrsen:0, problem:0, jn:0, jpt:0, odustajanje:0, ostalo:0 };
   // Broji aktivne statuse iz filtered (bez arhiviranih)
   filtered.forEach(p => {
     if (p.archived) return; // arhivirani se broje zasebno ispod
     if (p.status === 'zavrsen') { counts.zavrsen++; return; }
     if (counts[p.status] !== undefined) counts[p.status]++;
+    else if (p.status) counts.ostalo++;
     else counts.aktivan++;
   });
   // Završeni = arhivirani projekti (iz cijelog projects arraya)
-  counts.zavrsen += projects.filter(p => p.archived).length;
+  counts.zavrsen     += projects.filter(p => p.archived && !jeOdustao(p)).length;
+  counts.odustajanje += projects.filter(p => p.archived &&  jeOdustao(p)).length;
   const activeCount = filtered.length;
   const totalCount = projects.length; // svi projekti uključujući završene
 
@@ -3187,19 +3315,26 @@ function render() {
   document.getElementById('sc-ceka').textContent  = `Čeka: ${counts.ceka}`;
   document.getElementById('sc-zavrs').textContent = `Završeno: ${counts.zavrsen}`;
   document.getElementById('sc-prob').textContent  = `Problem: ${counts.problem}`;
+  [['sc-jpt','Javnoprav. tijela',counts.jpt],['sc-odust','Obustavljeni',counts.odustajanje],['sc-ostalo','Ostalo',counts.ostalo]].forEach(([id,lab,n]) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = `${lab}: ${n}`; el.style.display = n ? '' : 'none'; }
+  });
   document.getElementById('totalPill').textContent = `${totalCount} projekt${totalCount===1?'':'a'}`;
   document.title = `(${totalCount}) Praćenje investicijskih projekata`;
 
   // Dashboard — svi statusi uključujući izrada_pd i ishodjenje
   const rokKrit = filtered.filter(p => rokStatus(p) === 'kritican').length;
   document.getElementById('dashboard').innerHTML = `
-    <div class="dash-card"><div class="dash-label">Ukupno</div><div class="dash-value">${totalCount}</div><div class="dash-sub">aktivnih projekata</div></div>
+    <div class="dash-card"><div class="dash-label">Ukupno</div><div class="dash-value">${projects.filter(p => !p.archived).length}</div><div class="dash-sub">aktivnih projekata</div></div>
     <div class="dash-card"><div class="dash-label">Aktivni radovi</div><div class="dash-value">${counts.aktivan}</div><div class="dash-sub">radovi u tijeku</div></div>
     ${counts.izrada_pd ? `<div class="dash-card"><div class="dash-label">Izrada proj. dok.</div><div class="dash-value">${counts.izrada_pd}</div><div class="dash-sub">projektiranje</div></div>` : ''}
     ${counts.ishodjenje ? `<div class="dash-card"><div class="dash-label">Ishođenje dozvola</div><div class="dash-value">${counts.ishodjenje}</div><div class="dash-sub">u postupku</div></div>` : ''}
     <div class="dash-card"><div class="dash-label">Javna nabava</div><div class="dash-value">${counts.jn}</div><div class="dash-sub">JN u tijeku</div></div>
     <div class="dash-card"><div class="dash-label">Čeka pokretanje</div><div class="dash-value">${counts.ceka}</div><div class="dash-sub">nije započeto</div></div>
     <div class="dash-card"><div class="dash-label">Završeno</div><div class="dash-value">${counts.zavrsen}</div><div class="dash-sub">realizirano</div></div>
+    ${counts.jpt ? `<div class="dash-card dash-clickable" onclick="setFilter('jpt')"><div class="dash-label">Javnopravna tijela</div><div class="dash-value" style="color:#5eead4">${counts.jpt}</div><div class="dash-sub">odnosi s JPT</div></div>` : ''}
+    ${counts.odustajanje ? `<div class="dash-card dash-clickable" onclick="setFilter('odustajanje')"><div class="dash-label">Obustavljeni</div><div class="dash-value" style="color:#cbd5e1">${counts.odustajanje}</div><div class="dash-sub">obustavljeni projekti</div></div>` : ''}
+    ${counts.ostalo ? `<div class="dash-card dash-clickable" onclick="setFilter('ostalo')"><div class="dash-label">Ostalo</div><div class="dash-value" style="color:#d8b4fe">${counts.ostalo}</div><div class="dash-sub">slobodni status</div></div>` : ''}
     ${counts.problem ? `<div class="dash-card dash-danger"><div class="dash-label">Problem / Kašnjenje</div><div class="dash-value">${counts.problem}</div><div class="dash-sub">zahtijeva pažnju</div></div>` : ''}
     ${rokKrit ? `<div class="dash-card dash-danger dash-clickable" onclick="setFilter('rok_istekao')"><div class="dash-label">Rok istekao</div><div class="dash-value">${rokKrit}</div><div class="dash-sub">klikni za prikaz ↓</div></div>` : ''}
   `;
@@ -3238,9 +3373,9 @@ function render() {
     const collapsed = collapsedSektori.has(s.key);
 
     // mini statistike po statusu - računaj iz svih projekata sektora (ne samo filtered)
-    const sc = { aktivan:0, izrada_pd:0, ishodjenje:0, ceka:0, zavrsen:0, problem:0, jn:0 };
+    const sc = { aktivan:0, izrada_pd:0, ishodjenje:0, ceka:0, zavrsen:0, problem:0, jn:0, jpt:0, odustajanje:0 };
     projects.filter(p => (p.sektor||'ostalo') === s.key).forEach(p => {
-      if (p.archived) { sc.zavrsen++; return; }
+      if (p.archived) { if (jeOdustao(p)) sc.odustajanje++; else sc.zavrsen++; return; }
       if (p.status === 'zavrsen') { sc.zavrsen++; return; }
       if (sc[p.status] !== undefined) sc[p.status]++;
     });
@@ -3253,6 +3388,8 @@ function render() {
       sc.ceka       ? `<span class="sektor-stat ss-ceka"  onclick="event.stopPropagation();setFilter('ceka')"      style="cursor:pointer">⏳ Čeka: ${sc.ceka}</span>` : '',
       sc.zavrsen    ? `<span class="sektor-stat ss-zavrs" onclick="event.stopPropagation();setFilter('zavrsen')"   style="cursor:pointer">✓ Završeno: ${sc.zavrsen}</span>` : '',
       sc.problem    ? `<span class="sektor-stat ss-prob"  onclick="event.stopPropagation();setFilter('problem')"   style="cursor:pointer">⚠ Problem: ${sc.problem}</span>` : '',
+      sc.jpt        ? `<span class="sektor-stat" onclick="event.stopPropagation();setFilter('jpt')" style="cursor:pointer;background:#e0f2f1;color:#00695c">🏛 Javnoprav. tijela: ${sc.jpt}</span>` : '',
+      sc.odustajanje ? `<span class="sektor-stat" onclick="event.stopPropagation();setFilter('odustajanje')" style="cursor:pointer;background:#eceff1;color:#455a64">✖ Obustavljeni: ${sc.odustajanje}</span>` : '',
     ].filter(Boolean).join('');
 
     html += `<div class="sektor-block ${s.cls}" id="sektor-${s.key}">
@@ -3379,24 +3516,27 @@ function toggleSektor(key) {
 let archiveOpen = false;
 
 function archiveProject(id) {
-  if (!confirm('Premjestiti projekt u Završene projekte?')) return;
   const nid = isNaN(id) ? id : Number(id);
   const p = projects.find(x => x.id === nid || x.id === id);
+  if (!p) return;
+  if (!confirm(jeOdustao(p) ? 'Premjestiti projekt u Obustavljene projekte?' : 'Premjestiti projekt u Završene projekte?')) return;
   if (p) {
     p.archived = true;
     p.archivedDate = new Date().toLocaleDateString('hr-HR');
     save(); render(); renderArchive();
-    toast && toast('Projekt premješten u Završene');
+    toast && toast(jeOdustao(p) ? 'Projekt premješten u Obustavljene' : 'Projekt premješten u Završene');
   }
 }
 
 function unarchiveProject(id) {
-  if (!confirm('Vratiti projekt u aktivne projekte?')) return;
+  if (!confirm('Vratiti projekt u aktivne projekte?\n\nStatus projekta će se obrisati - odaberi novi status u obrascu.')) return;
   const nid = isNaN(id) ? id : Number(id);
   const p = projects.find(x => x.id === nid || x.id === id);
   if (p) {
     p.archived = false;
     p.archivedDate = null;
+    // inace bi se kod sljedeceg spremanja odmah vratio u arhivu
+    if (p.status === 'zavrsen' || p.status === 'odustajanje') p.status = '';
     save(); render(); renderArchive();
     toast && toast('Projekt vraćen u aktivne');
   }
@@ -3413,13 +3553,16 @@ function toggleArchiveView() {
 
 function renderArchive() {
   const archived = projects.filter(p => p.archived);
+  const zavrseni = poredajProjekte(archived.filter(p => !jeOdustao(p)));
+  const odustali = poredajProjekte(archived.filter(p => jeOdustao(p)));
   // Ažuriraj brojač u gumbu
-  document.getElementById('archiveCount').textContent = archived.length;
+  document.getElementById('archiveCount').textContent = zavrseni.length;
+  const _ob = document.getElementById('archiveCountObust');
+  if (_ob) { _ob.textContent = '✖ ' + odustali.length; _ob.style.display = odustali.length ? '' : 'none'; }
+  const zTxt = zavrseni.length === 1 ? '1 završeni' : zavrseni.length < 5 && zavrseni.length > 0 ? `${zavrseni.length} završena` : `${zavrseni.length} završenih`;
   document.getElementById('archiveSubtitle').textContent =
-    archived.length === 0 ? 'Nema završenih projekata' :
-    archived.length === 1 ? '1 završeni projekt' :
-    archived.length < 5 ? `${archived.length} završena projekta` :
-    `${archived.length} završenih projekata`;
+    archived.length === 0 ? 'Nema završenih ni obustavljenih projekata' :
+    zTxt + (odustali.length ? ` · ${odustali.length} obustavljen${odustali.length === 1 ? 'i' : 'ih'}` : '');
 
   if (!archiveOpen) return;
   const grid = document.getElementById('archiveGrid');
@@ -3428,7 +3571,18 @@ function renderArchive() {
     grid.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><h3>Nema završenih projekata</h3><p>Završeni projekti pojavit će se ovdje.</p></div>`;
     return;
   }
-  grid.innerHTML = `<div class="cards-grid">${archived.map((p, i) => archivedCardHtml(p, i)).join('')}</div>`;
+  const naslov = (t, n, boja) => `<div style="margin:18px 0 10px;font-weight:700;font-size:14px;color:${boja}">${t} — ${n}</div>`;
+  // unutar skupine: po godini završetka, najnovija prva
+  const poGodinama = (lista, boja) => {
+    const g = {};
+    lista.forEach(p => { const y = godinaZavrsetka(p) || 'Bez datuma'; (g[y] = g[y] || []).push(p); });
+    return Object.keys(g).sort((a, b) => (b === 'Bez datuma' ? -1 : a === 'Bez datuma' ? 1 : b.localeCompare(a))).map(y =>
+      `<div style="margin:10px 0 8px 4px;font-weight:600;font-size:12px;color:${boja};opacity:.85">${y === 'Bez datuma' ? y : y + '.'} (${g[y].length})</div>` +
+      `<div class="cards-grid">${g[y].map((p, i) => archivedCardHtml(p, i)).join('')}</div>`).join('');
+  };
+  grid.innerHTML =
+    (zavrseni.length ? naslov('✅ Završeni projekti', zavrseni.length, '#10b981') + poGodinama(zavrseni, '#10b981') : '') +
+    (odustali.length ? naslov('✖ Obustavljeni projekti', odustali.length, '#64748b') + poGodinama(odustali, '#64748b') : '');
 }
 
 function archivedCardHtml(p, i) {
@@ -3436,7 +3590,9 @@ function archivedCardHtml(p, i) {
     <div class="card archived-card" style="animation-delay:${i*0.04}s">
       <div class="card-top">
         <div>
-          <div class="card-rbr">Projekt ${p.rbr || '#'} · <span style="color:#10b981;font-weight:600">✅ Završen${p.archivedDate ? ' · ' + p.archivedDate : ''}</span></div>
+          <div class="card-rbr">${p.kapitalni ? 'Kapitalni' : 'Projekt'} · ${jeOdustao(p)
+            ? `<span style="color:#64748b;font-weight:600">✖ Obustavljeno${p.archivedDate ? ' · ' + p.archivedDate : ''}</span>`
+            : `<span style="color:#10b981;font-weight:600">✅ Završen${p.archivedDate ? ' · ' + p.archivedDate : ''}</span>`}</div>
           <div class="card-ustanova">${p.ustanova || '–'}</div>
           ${p.vrstaRadova ? `<div class="card-adresa">${p.vrstaRadova}</div>` : ''}
         </div>
@@ -3521,7 +3677,7 @@ function setNositeljInModal(value) {
 function openModal(project = null) {
   editId = project ? project.id : null;
   document.getElementById('modalTitle').innerHTML = project
-    ? 'Uredi projekt' + (project.ustanova ? '<span style="display:block;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:400;color:#9fb6d4;margin-top:3px">' + (project.rbr ? project.rbr + '. ' : '') + String(project.ustanova).replace(/</g,'&lt;') + '</span>' : '')
+    ? 'Uredi projekt' + (project.ustanova ? '<span style="display:block;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:400;color:#9fb6d4;margin-top:3px">' + (oznakaProjekta(project) ? oznakaProjekta(project).replace(/\.$/,'') + '. ' : '') + String(project.ustanova).replace(/</g,'&lt;') + '</span>' : '')
     : 'Novi projekt';
 
   const simple = {
@@ -3532,9 +3688,10 @@ function openModal(project = null) {
     'f-voditelj-guszboi': ulogeGuszboi(project).voditelj,
     'f-suradnici-guszboi': ulogeGuszboi(project).suradnici,
     'f-osoba-obnova':     project?.osobaObnova || '',
+    'f-godina-pokretanja': project ? (project.godinaPokretanja || prijedlogGodine(project)) : String(new Date().getFullYear()),
     'f-status':           (() => {
-      const knownStatuses = ['aktivan','izrada_pd','ceka','zavrsen','problem','jn',''];
-      return knownStatuses.includes(project?.status) ? (project?.status || '') : 'ostalo';
+      const st = project?.status || '';
+      return (STATUS_MAP[st] !== undefined) ? st : 'ostalo';
     })(),
     'f-datum-zavrsen':    project?.datumZavrsen || '',
     'f-vrijednost':       project?.vrijednostLog?.[0]?.txt || project?.vrijednost || '',
@@ -3545,6 +3702,10 @@ function openModal(project = null) {
     const el = document.getElementById(id);
     if (el) el.value = val;
   });
+
+  // Napomena kad je godina pokretanja samo prijedlog
+  const _gp = document.getElementById('godina-prijedlog');
+  if (_gp) _gp.style.display = (project && !project.godinaPokretanja && document.getElementById('f-godina-pokretanja').value) ? '' : 'none';
 
   // Prikaži izračunatu razliku vrijednosti
   if (typeof osvjeziRazliku === 'function') osvjeziRazliku();
@@ -3616,9 +3777,11 @@ function openModal(project = null) {
 
   // Popuni slobodni status ako treba
   const slobStatusEl = document.getElementById('f-status-slobodni');
-  const knownStatuses2 = ['aktivan','izrada_pd','ceka','zavrsen','problem','jn',''];
+  const knownStatuses2 = Object.keys(STATUS_MAP);
+  if (slobStatusEl) slobStatusEl.value = '';
   if (slobStatusEl && project?.status && !knownStatuses2.includes(project.status)) {
     slobStatusEl.value = project.status;
+    const fs = document.getElementById('f-status'); if (fs) fs.value = 'ostalo';
   }
   toggleZavrsenField();
   setTimeout(() => {
@@ -3712,9 +3875,9 @@ function pregledKartice(){
   }
   const sadrzaj=
     '<div class="ps"><h1>'+(p.ustanova||'')+'</h1>'+
-    '<div style="color:#666;font-size:13px">'+(p.vrstaRadova||'')+' | Status: <strong style="color:#1a4ea8">'+(p.status||'—')+'</strong> | '+new Date().toLocaleDateString('hr-HR')+'</div></div>'+
+    '<div style="color:#666;font-size:13px">'+(p.vrstaRadova||'')+' | Status: <strong style="color:#1a4ea8">'+(statusNaziv(p.status)||'—')+'</strong> | '+new Date().toLocaleDateString('hr-HR')+'</div></div>'+
     sek('Osnovni podaci','<div class="pg">'+
-      row('Sektor',p.sektor)+row('R.br.',p.rbr)+row('Vrsta radova',p.vrstaRadova)+
+      row('Sektor',p.sektor)+row('R.br.',oznakaProjekta(p)||'–')+row('Vrsta radova',p.vrstaRadova)+
       row('Voditelj GUSZBOI',ulogeGuszboi(p).voditelj)+row('Suradnici GUSZBOI',ulogeGuszboi(p).suradnici)+row('Osoba ustanova',p.osobaObnova)+row('Nositelj',p.nositelj)+
       row('Kapitalni',(p.kapitalni===true||p.kapitalni==='True')?'Da':'Ne')+
       row('Datum završetka',fd(p.datumZavrsen)!=='—'?fd(p.datumZavrsen):((p.rokInv&&p.rokInv.length&&p.rokInv[0].txt)?p.rokInv[0].txt:'—'))+
@@ -3817,7 +3980,7 @@ function ispisModalPDF() {
     '</div>' +
     '<div class="print-section"><h3>Osnovni podaci</h3><div class="print-grid">' +
     row('Sektor', p.sektor) +
-    row('R.br.', p.rbr) +
+    row('R.br.', oznakaProjekta(p) || '–') +
     row('Vrsta radova', p.vrstaRadova) +
     row('Voditelj GUSZBOI', ulogeGuszboi(p).voditelj) +
     row('Suradnici GUSZBOI', ulogeGuszboi(p).suradnici) +
@@ -4011,7 +4174,7 @@ function prikaziDinMapiranjeDiaolog(katDso, kategorije) {
   kategorije.forEach(kat => {
     const dsoList = [...katDso[kat]].sort().join(', ');
     const opts = eligibilni.map(p =>
-      `<option value="${p.id}">${p.rbr || ''} ${p.ustanova || ''} — ${(p.vrstaRadova||'').substring(0,40)}</option>`
+      `<option value="${p.id}">${oznakaProjekta(p)} ${p.ustanova || ''} — ${(p.vrstaRadova||'').substring(0,40)}</option>`
     ).join('');
 
     html += `<div style="border:1px solid var(--border,#ddd);border-radius:8px;padding:12px;margin-bottom:10px">
@@ -4163,6 +4326,7 @@ function saveProject() {
     fotoLinkovi:     (fotoLinkovi||[]).filter(function(l){return (l.putanja||'').trim();}),
     sufinanciranje:  get('f-sufinanciranje'),
     proracunGodine:  proracunGodine.filter(r => r.godina || r.iznos),
+    godinaPokretanja: godinaIz(get('f-godina-pokretanja')),
     nositelj:        get('f-nositelj'),
     napomene:        [...diaries.napomene],
     opremanje:       [...diaries.opremanje],
@@ -4180,7 +4344,15 @@ function saveProject() {
   data.statusJn = (jnSel === 'ostalo' && jnSlobodni) ? jnSlobodni : jnSel;
   data.jnRadovi = [...diaries.jnRadovi];
   data.datumZavrsen = document.getElementById('f-datum-zavrsen')?.value || null;
-  data.archived = (data.status === 'zavrsen') ? true : (editId ? (projects.find(p=>p.id===editId)?.archived||false) : false);
+  // Završeno i Odustajanje automatski premještaju projekt u arhivu (Završeni / Odustali)
+  const _orig = editId ? projects.find(p => p.id === editId) : null;
+  data.archived = (data.status === 'zavrsen' || data.status === 'odustajanje') ? true : (_orig ? (_orig.archived || false) : false);
+  data.archivedDate = data.archived
+    ? ((_orig && _orig.archived && _orig.archivedDate) ? _orig.archivedDate : new Date().toLocaleDateString('hr-HR'))
+    : null;
+  if (data.archived && !(_orig && _orig.archived)) {
+    setTimeout(() => toast && toast(data.status === 'odustajanje' ? 'Projekt premješten u Obustavljene' : 'Projekt premješten u Završene'), 300);
+  }
   // kapitalni se čita iz checkboxa (linija iznad u data objektu)
   data.dinLink = editId ? (projects.find(function(p){ return p.id===editId; })?.dinLink||null) : null;
   if (!data.ustanova) { alert('Molimo unesite naziv ustanove.'); return; }
@@ -4326,17 +4498,17 @@ async function izvozExcel(samoZadnji = false) {
     'Status i rok: opremanje',
     'Sljedeća aktivnost i rok', 'Rok završetka investicije',
     'Ugovorena vrijednost (s PDV)', 'Sufinancirano od Fonda', 'Proračun GZ (po godinama)',
-    'Napomene', 'Zadnja izvršena promjena'
+    'Napomene', 'Zadnja izvršena promjena', 'Godina pokretanja'
   ];
 
-  const toRow = p => [
-    p.rbr||'', p.ustanova||'', p.vrstaRadova||'', p.nositelj||'',
+  const toRow = (p, rbr) => [
+    (rbr !== undefined ? rbr : (p.rbr||'')), p.ustanova||'', p.vrstaRadova||'', p.nositelj||'',
     ulogeGuszboi(p).voditelj, ulogeGuszboi(p).suradnici, p.osobaObnova||'',
-    STATUS_LABEL[p.status]||'', diaryStr(p.radovi),
+    statusNaziv(p.status), diaryStr(p.radovi),
     diaryStr(p.opremanje), diaryStr(p.sljedeca), diaryStr(p.rokInv),
     p.vrijednostLog?.[0]?.txt || p.vrijednost||'', p.sufinanciranje||'',
     (p.proracunGodine||[]).map(r=>`${r.godina}: ${r.iznos}`).join('\n'),
-    diaryStr(p.napomene), diaryStr(p.zadnja),
+    diaryStr(p.napomene), diaryStr(p.zadnja), p.godinaPokretanja || '',
   ];
 
   const SEKTOR_BOJE = {
@@ -4347,7 +4519,7 @@ async function izvozExcel(samoZadnji = false) {
     zdravstvo: 'E8F0FB', socijala: 'F0EBFF',
     energetska: 'E4F5EC', ostalo: 'F3F4F6', svi: 'EEF1F8'
   };
-  const COL_WIDTHS = [6, 28, 22, 18, 9, 11, 18, 16, 45, 45, 45, 28, 18, 18, 22, 45, 45];
+  const COL_WIDTHS = [6, 28, 22, 18, 9, 11, 18, 16, 45, 45, 45, 28, 18, 18, 22, 45, 45, 10];
 
   const wb = new ExcelJS.Workbook();
   wb.creator = 'Grad Zagreb';
@@ -4359,7 +4531,7 @@ async function izvozExcel(samoZadnji = false) {
     // Stupci koji se sakrivaju u skracenom izvozu (0-based): 12=Ugovorena, 13=Sufinancirano, 14=Proracun
     const SAKRIJ = samoZadnji ? [12,13,14].map(i => i + POMAK) : [];
     // Uze sirine za skraceni izvoz
-    const SIRINE_OSN = samoZadnji ? [5,24,18,10,8,9,9,14,32,32,32,20,16,16,18,32,32] : COL_WIDTHS;
+    const SIRINE_OSN = samoZadnji ? [5,24,18,10,8,9,9,14,32,32,32,20,16,16,18,32,32,9] : COL_WIDTHS;
     const SIRINE = POMAK > 0 ? [...Array(POMAK).fill(14), ...SIRINE_OSN] : SIRINE_OSN;
     const hdrColor = 'FF' + (SEKTOR_BOJE[sektorKey] || SEKTOR_BOJE.svi);
     const altColor = 'FF' + (ALT_BOJE[sektorKey] || ALT_BOJE.svi);
@@ -4401,9 +4573,24 @@ async function izvozExcel(samoZadnji = false) {
     });
 
     // Data rows
-    rows.forEach((rowData, ri) => {
+    let ri = 0;
+    rows.forEach((rowData) => {
+      // Naslovni red sekcije (npr. KAPITALNI PROJEKTI)
+      if (rowData && rowData.__sekcija) {
+        const sr = ws.addRow([rowData.__sekcija]);
+        ws.mergeCells(sr.number, 1, sr.number, headers.length);
+        const c = sr.getCell(1);
+        c.font = { bold: true, size: 11, name: 'Arial', color: { argb: hdrColor } };
+        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: altColor } };
+        c.alignment = { vertical: 'middle', horizontal: 'left' };
+        c.border = { bottom: { style: 'medium', color: { argb: hdrColor } } };
+        sr.height = 20;
+        ri = 0;
+        return;
+      }
       const row = ws.addRow(rowData);
       const fillColor = ri % 2 === 0 ? 'FFFFFFFF' : altColor;
+      ri++;
 
       row.eachCell({ includeEmpty: true }, cell => {
         cell.font = { size: 10, name: 'Arial' };
@@ -4420,30 +4607,53 @@ async function izvozExcel(samoZadnji = false) {
       // Izračun visine reda prema sadržaju
       let maxLines = 1;
       rowData.forEach((cell, ci) => {
+        if (SAKRIJ.includes(ci)) return;          // skriveni stupci ne utjecu na visinu
         const txt = String(cell||'').trimEnd();
         if (!txt) return;
         const w = SIRINE[ci] || 20;
+        // skraceni izvoz: tocnija procjena (Arial 10 stane ~1,15 znaka po jedinici sirine)
+        const poRedu = samoZadnji ? w * 1.15 : w * 0.9;
         const lines = txt.split('\n').reduce((s, seg) =>
-          s + Math.max(1, Math.ceil(seg.length / (w * 0.9))), 0);
+          s + Math.max(1, Math.ceil(seg.length / poRedu)), 0);
         if (lines > maxLines) maxLines = lines;
       });
-      row.height = Math.min(300, Math.max(15, maxLines * 15));
+      row.height = samoZadnji
+        ? Math.min(300, Math.max(15, maxLines * 12.75 + 4))
+        : Math.min(300, Math.max(15, maxLines * 15));
     });
   }
 
-  // Sheetsovi po sektoru
+  // Aktivni projekti po sektoru: prvo kapitalni, pa GUSZBOI; redni brojevi kao u aplikaciji
+  const sviRedovi = [];
   getSektori().forEach(s => {
-    const grp = projects.filter(p => (p.sektor||'ostalo') === s.key);
+    const grp = poredajProjekte(projects.filter(p => (p.sektor||'ostalo') === s.key && !jeZatvoren(p)));
     if (!grp.length) return;
-    addSheet(s.label, allHeaders, grp.map(toRow), s.key);
+    const kap = grp.filter(p => p.kapitalni), gu = grp.filter(p => !p.kapitalni);
+    const redovi = [];
+    if (kap.length) { redovi.push({ __sekcija: `KAPITALNI PROJEKTI (${kap.length})` }); kap.forEach(p => redovi.push(toRow(p, rbrPrikaz(p)))); }
+    if (gu.length)  { redovi.push({ __sekcija: `GUSZBOI PROJEKTI (${gu.length})` });   gu.forEach(p => redovi.push(toRow(p, rbrPrikaz(p) + '.'))); }
+    addSheet(s.label, allHeaders, redovi, s.key);
+    if (kap.length) { sviRedovi.push({ __sekcija: `${s.label.toUpperCase()} — KAPITALNI PROJEKTI (${kap.length})` }); kap.forEach(p => sviRedovi.push([s.label, ...toRow(p, rbrPrikaz(p))])); }
+    if (gu.length)  { sviRedovi.push({ __sekcija: `${s.label.toUpperCase()} — GUSZBOI PROJEKTI (${gu.length})` });   gu.forEach(p => sviRedovi.push([s.label, ...toRow(p, rbrPrikaz(p) + '.')])); }
   });
 
-  // Zbirni sheet
-  addSheet('Svi projekti',
-    ['Sektor', ...allHeaders],
-    projects.map(p => [getSektorLabel(p.sektor||'ostalo'), ...toRow(p)]),
-    'svi'
-  );
+  // Zbirni sheet (samo aktivni)
+  addSheet('Svi projekti', ['Sektor', ...allHeaders], sviRedovi, 'svi');
+
+  // Završeni i odustali projekti - zaseban sheet
+  const zatvoreni = projects.filter(jeZatvoren);
+  if (zatvoreni.length) {
+    const red = p => [getSektorLabel(p.sektor||'ostalo'),
+      jeOdustao(p) ? 'Obustavljeno' : 'Završeno',
+      p.archivedDate || (p.datumZavrsen ? p.datumZavrsen.split('-').reverse().join('.') + '.' : ''),
+      ...toRow(p, p.kapitalni ? 'K' : '–')];
+    const zRedovi = [];
+    const zav = poredajProjekte(zatvoreni.filter(p => !jeOdustao(p)));
+    const odu = poredajProjekte(zatvoreni.filter(p =>  jeOdustao(p)));
+    if (zav.length) { zRedovi.push({ __sekcija: `ZAVRŠENI PROJEKTI (${zav.length})` }); zav.forEach(p => zRedovi.push(red(p))); }
+    if (odu.length) { zRedovi.push({ __sekcija: `OBUSTAVLJENI PROJEKTI (${odu.length})` }); odu.forEach(p => zRedovi.push(red(p))); }
+    addSheet('Završeni i obustavljeni', ['Sektor', 'Završeno / obustavljeno', 'Datum', ...allHeaders], zRedovi, 'ostalo');
+  }
 
   const buffer = await wb.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
