@@ -3861,7 +3861,7 @@ function pregledKartice(){
           const dinBilj=(dp.notes||[]).slice().reverse().map(function(n){
             return '<div class="pn"><div class="pt">'+(n.d||'')+'</div>'+(n.t||'').split('\n').join('<br>')+'</div>';
           }).join('');
-          din=sek('Dinamika projekata — '+(dp.u||''),
+          din=sek('Dinamika projekata — '+dinNaziv(dp),
             '<div class="pg">'+
             row('Ev. broj',dp.ev)+
             row('Ugovorena vr.',dp.uog?dp.uog.toLocaleString('hr-HR')+' €':null)+
@@ -3967,7 +3967,7 @@ function ispisModalPDF() {
           const dinBiljeske = (dinProj.notes||[]).slice(-5).reverse().map(n =>
             '<div class="print-note-item"><span style="color:#666;font-size:10px">' + (n.d||'') + '</span><br>' + (n.t||'').replace(/\n/g,'<br>') + '</div>'
           ).join('');
-          dinHtml = '<div class="print-section"><h3>Dinamika projekata \u2014 ' + (dinProj.u||'') + '</h3>' +
+          dinHtml = '<div class="print-section"><h3>Dinamika projekata \u2014 ' + dinNaziv(dinProj) + '</h3>' +
             '<div class="print-grid">' + dinRows + '</div>' +
             (dinBiljeske ? '<div style="margin-top:6px"><strong style="font-size:11px">Posljednje bilješke:</strong>' + dinBiljeske + '</div>' : '') +
             '</div>';
@@ -4788,13 +4788,18 @@ function openDinPanel(pid) {
     Object.keys(orgs).forEach(function(org) {
       var od = orgs[org];
       Object.keys(od).filter(function(k){ return !k.startsWith('__')&&Array.isArray(od[k]); }).forEach(function(cat) {
-        var grp = document.createElement('optgroup'); grp.label = org+' › '+cat;
-        od[cat].forEach(function(pr) {
-          var o = document.createElement('option');
-          o.value = org+'::'+cat+'::'+pr.id; o.textContent = pr.u;
-          if (p.dinLink===o.value) o.selected = true;
-          grp.appendChild(o);
-        }); sel.appendChild(grp);
+        // projekti iz Dinamike grupirani po godini plana (isti naziv moze postojati u vise godina)
+        var poGod = {};
+        od[cat].forEach(function(pr){ var g = dinGodina(pr); (poGod[g] = poGod[g] || []).push(pr); });
+        Object.keys(poGod).sort().reverse().forEach(function(g) {
+          var grp = document.createElement('optgroup'); grp.label = org+' › '+cat+' › '+g+'.';
+          poGod[g].forEach(function(pr) {
+            var o = document.createElement('option');
+            o.value = org+'::'+cat+'::'+pr.id; o.textContent = pr.u + ' (' + g + '.)' + (pr.archived ? ' – arhiviran' : '');
+            if (p.dinLink===o.value) o.selected = true;
+            grp.appendChild(o);
+          }); sel.appendChild(grp);
+        });
       });
     });
   } else {
@@ -4840,7 +4845,7 @@ function renderDcpBody(p, orgs) {
   var fE = function(v){ return v?'€ '+Number(v).toLocaleString('hr-HR',{minimumFractionDigits:2}):'—'; };
   var raz = dp.pro&&dp.uog?dp.pro-dp.uog:null;
   var h = '<div style="background:#f0f4ff;border-radius:8px;padding:12px;border:1px solid #c7d7f5">';
-  h += '<b style="font-size:12px;color:#1a4a8a">'+pts[1]+' · '+dp.u+'</b>';
+  h += '<b style="font-size:12px;color:#1a4a8a">'+pts[1]+' · '+dinNaziv(dp)+'</b>';
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:13px">';
   h += '<div><div style="font-size:10px;color:#6b7a96">Proračun</div><b>'+fE(dp.pro)+'</b></div>';
   h += '<div><div style="font-size:10px;color:#6b7a96">Ugovoreno</div><b>'+fE(dp.uog)+'</b></div>';
@@ -4859,6 +4864,10 @@ function renderDcpBody(p, orgs) {
   body.innerHTML = h;
 }
 
+// Godina plana projekta u Dinamici (projekti bez godine su iz 2026.)
+function dinGodina(pr) { return String((pr && pr.god) || '2026'); }
+function dinNaziv(pr) { return (pr && pr.u ? pr.u : '') + ' (' + dinGodina(pr) + '.)'; }
+
 function loadDinAccData() {
   var p = editId ? projects.find(function(x){ return x.id==editId; }) : null;
   var sel = document.getElementById('din-acc-sel');
@@ -4869,13 +4878,18 @@ function loadDinAccData() {
     Object.keys(orgs).forEach(function(org) {
       var od = orgs[org];
       Object.keys(od).filter(function(k){ return !k.startsWith('__')&&Array.isArray(od[k]); }).forEach(function(cat) {
-        var grp = document.createElement('optgroup'); grp.label = org+' › '+cat;
-        od[cat].forEach(function(pr) {
-          var o = document.createElement('option');
-          o.value = org+'::'+cat+'::'+pr.id; o.textContent = pr.u;
-          if (p && p.dinLink===o.value) o.selected = true;
-          grp.appendChild(o);
-        }); sel.appendChild(grp);
+        // projekti iz Dinamike grupirani po godini plana (isti naziv moze postojati u vise godina)
+        var poGod = {};
+        od[cat].forEach(function(pr){ var g = dinGodina(pr); (poGod[g] = poGod[g] || []).push(pr); });
+        Object.keys(poGod).sort().reverse().forEach(function(g) {
+          var grp = document.createElement('optgroup'); grp.label = org+' › '+cat+' › '+g+'.';
+          poGod[g].forEach(function(pr) {
+            var o = document.createElement('option');
+            o.value = org+'::'+cat+'::'+pr.id; o.textContent = pr.u + ' (' + g + '.)' + (pr.archived ? ' – arhiviran' : '');
+            if (p && p.dinLink===o.value) o.selected = true;
+            grp.appendChild(o);
+          }); sel.appendChild(grp);
+        });
       });
     });
   } else {
@@ -4913,7 +4927,7 @@ function renderDinAccPreview(p, orgs) {
   var fE = function(v){ return v?'€ '+Number(v).toLocaleString('hr-HR',{minimumFractionDigits:2}):'—'; };
   var raz = dp.pro&&dp.uog?dp.pro-dp.uog:null;
   var h='<div style="background:#f0f4ff;border-radius:8px;padding:12px;border:1px solid #c7d7f5;margin-bottom:10px">';
-  h+='<div style="font-size:12px;font-weight:700;color:#1a4a8a;margin-bottom:8px">'+pts[1]+' · '+dp.u+'</div>';
+  h+='<div style="font-size:12px;font-weight:700;color:#1a4a8a;margin-bottom:8px">'+pts[1]+' · '+dinNaziv(dp)+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px">';
   h+='<div><div style="font-size:10px;color:#6b7a96">Proračun</div><b>'+fE(dp.pro)+'</b></div>';
   h+='<div><div style="font-size:10px;color:#6b7a96">Ugovoreno</div><b>'+fE(dp.uog)+'</b></div>';
